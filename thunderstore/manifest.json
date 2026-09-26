@@ -1,0 +1,9 @@
+{
+  "name": "GWYFVR",
+  "version_number": "0.1.0",
+  "website_url": "https://github.com/DrDraxi/gwyf-vr",
+  "description": "Play Gamble With Your Friends in VR (OpenXR: SteamVR, Quest Link, Virtual Desktop).",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305"
+  ]
+}
