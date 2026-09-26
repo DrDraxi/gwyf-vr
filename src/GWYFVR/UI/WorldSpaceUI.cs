@@ -17,7 +17,17 @@ namespace GWYFVR.UI
     public class WorldSpaceUI : MonoBehaviour
     {
         /// <summary>Layer used for converted canvases, rendered only by the UI overlay camera.</summary>
-        public const int Layer = 31;
+        public static int Layer { get; } = FindFreeLayer();
+
+        private static int FindFreeLayer()
+        {
+            for (var layer = 31; layer >= 8; layer--)
+                if (string.IsNullOrEmpty(LayerMask.LayerToName(layer)))
+                    return layer;
+
+            Plugin.Log.LogWarning("No unused layer found for VR UI, menus may be hidden behind walls");
+            return 5;
+        }
 
         /// <summary>Canvases are laid out on this virtual screen, then scaled to the configured width.</summary>
         private static readonly Vector2 VirtualScreen = new Vector2(1920f, 1080f);
@@ -42,8 +52,7 @@ namespace GWYFVR.UI
         {
             Instance = this;
 
-            if (!string.IsNullOrEmpty(LayerMask.LayerToName(Layer)))
-                Plugin.Log.LogWarning($"Layer {Layer} is used by the game ({LayerMask.LayerToName(Layer)}), UI may render oddly");
+            Plugin.Log.LogInfo($"VR UI uses layer {Layer}");
 
             Anchor = new GameObject("VRUIAnchor").transform;
             Anchor.SetParent(transform, false);
@@ -87,20 +96,21 @@ namespace GWYFVR.UI
             // The overlay camera must render from exactly the same pose as the headset camera.
             overlayCamera.transform.SetPositionAndRotation(rig.VRCamera.transform.position, rig.VRCamera.transform.rotation);
 
-            UpdateAnchor(rig.VRCamera.transform);
+            UpdateAnchor(rig.transform, rig.VRCamera.transform);
             PlaceCanvases();
         }
 
-        private void UpdateAnchor(Transform head)
+        /// <summary>Place the panel in front of the head, in the rig's frame so it follows a tilted menu view.</summary>
+        private void UpdateAnchor(Transform rig, Transform head)
         {
-            var headYaw = head.eulerAngles.y;
+            var headYaw = head.localEulerAngles.y;
             if (!anchorPlaced || Mathf.Abs(Mathf.DeltaAngle(anchorYaw, headYaw)) > FollowAngle || AnyNewlyOpened())
             {
                 anchorYaw = headYaw;
                 anchorPlaced = true;
             }
 
-            var rotation = Quaternion.Euler(0f, anchorYaw, 0f);
+            var rotation = rig.rotation * Quaternion.Euler(0f, anchorYaw, 0f);
             var position = head.position + rotation * Vector3.forward * Plugin.Settings.UIDistance.Value;
             Anchor.SetPositionAndRotation(position, rotation);
         }

@@ -29,6 +29,8 @@ namespace GWYFVR
         public readonly ConfigEntry<float> UIDistance;
         public readonly ConfigEntry<float> UIWidth;
 
+        public readonly ConfigEntry<bool> DevCommands;
+
         public VRConfig(ConfigFile config)
         {
             EnableVR = config.Bind("General", "EnableVR", true,
@@ -53,6 +55,9 @@ namespace GWYFVR
                 new ConfigDescription("How far in front of you menus and the HUD float, in meters.", new AcceptableValueRange<float>(0.5f, 5f)));
             UIWidth = config.Bind("UI", "Width", 1.8f,
                 new ConfigDescription("Width of menus and the HUD, in meters.", new AcceptableValueRange<float>(0.5f, 5f)));
+
+            DevCommands = config.Bind("Debug", "DevCommands", false,
+                "For mod development: run commands written to BepInEx/gwyfvr-command.txt (screenshot, dump).");
         }
     }
 }

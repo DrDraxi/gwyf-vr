@@ -234,8 +234,15 @@ namespace GWYFVR.Player
             var headPos = VRInput.ReadPosition(VRInput.HeadPosition);
             var headRot = VRInput.ReadRotation(VRInput.HeadRotation);
 
-            var baseYaw = PlayerMode ? 0f : Source.transform.eulerAngles.y;
-            var rigRotation = Quaternion.Euler(0f, baseYaw + turnYaw, 0f);
+            // With the player in control only the turn offset applies, the headset drives the head.
+            // Otherwise (menus, cutscenes) the game camera's view becomes "straight ahead", including
+            // its pitch, so top-down menu cameras still show what they point at. Roll is dropped.
+            var rigRotation = Quaternion.Euler(0f, turnYaw, 0f);
+            if (!PlayerMode)
+            {
+                var source = Source.transform.eulerAngles;
+                rigRotation = Quaternion.Euler(source.x, source.y + turnYaw, 0f);
+            }
 
             // Put the headset's eye exactly where the game camera is. Physical movement is not added on
             // top, which keeps the view and the player's body in sync.

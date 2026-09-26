@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
@@ -47,7 +48,8 @@ namespace GWYFVR.XR
             generalSettings.Manager = managerSettings;
             managerSettings.automaticLoading = false;
             managerSettings.automaticRunning = false;
-            managerSettings.TryAddLoader(loader);
+            // TryAddLoader only accepts loaders registered in the editor, so add it to the list directly.
+            ((List<XRLoader>)managerSettings.activeLoaders).Add(loader);
 
             var settings = OpenXRSettings.Instance;
             Keep(settings);
@@ -63,6 +65,7 @@ namespace GWYFVR.XR
             if (managerSettings.activeLoader == null)
             {
                 Plugin.Log.LogError("OpenXR loader failed to initialize");
+                LogDiagnosticReport();
                 return false;
             }
 
@@ -70,9 +73,10 @@ namespace GWYFVR.XR
 
             var displays = new List<XRDisplaySubsystem>();
             SubsystemManager.GetSubsystems(displays);
-            if (!displays.Any(d => d.running))
+            // The display only reports running once the OpenXR session begins, a frame or two later.
+            if (displays.Count == 0)
             {
-                Plugin.Log.LogError("OpenXR started but no headset display is running");
+                Plugin.Log.LogError("OpenXR started but no headset display was created");
                 managerSettings.DeinitializeLoader();
                 return false;
             }
@@ -81,6 +85,30 @@ namespace GWYFVR.XR
 
             Plugin.Log.LogInfo($"OpenXR running on {OpenXRRuntime.name} {OpenXRRuntime.version}");
             return true;
+        }
+
+        [DllImport("UnityOpenXR", EntryPoint = "DiagnosticReport_GenerateReport")]
+        private static extern IntPtr GenerateReport();
+
+        [DllImport("UnityOpenXR", EntryPoint = "DiagnosticReport_ReleaseReport")]
+        private static extern void ReleaseReport(IntPtr report);
+
+        /// <summary>Unity's OpenXR plugin collects why startup failed in a report that is not logged by default.</summary>
+        private static void LogDiagnosticReport()
+        {
+            try
+            {
+                var report = GenerateReport();
+                if (report == IntPtr.Zero)
+                    return;
+
+                Plugin.Log.LogWarning("OpenXR diagnostic report:\n" + Marshal.PtrToStringAnsi(report));
+                ReleaseReport(report);
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"Could not read the OpenXR diagnostic report: {ex.Message}");
+            }
         }
 
         private static T Keep<T>(T obj) where T : UnityEngine.Object

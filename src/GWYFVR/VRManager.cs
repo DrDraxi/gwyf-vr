@@ -20,6 +20,9 @@ namespace GWYFVR
             rig.AddComponent<VRRig>();
             gameObject.AddComponent<VRPointer>();
             gameObject.AddComponent<GazeDot>();
+
+            if (Plugin.Settings.DevCommands.Value)
+                gameObject.AddComponent<DevCommands>();
         }
 
         private void Update()
