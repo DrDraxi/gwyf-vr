@@ -53,7 +53,7 @@ namespace GWYFVR
 
             UIDistance = config.Bind("UI", "Distance", 1.6f,
                 new ConfigDescription("How far in front of you menus and the HUD float, in meters.", new AcceptableValueRange<float>(0.5f, 5f)));
-            UIWidth = config.Bind("UI", "Width", 1.8f,
+            UIWidth = config.Bind("UI", "Width", 2.4f,
                 new ConfigDescription("Width of menus and the HUD, in meters.", new AcceptableValueRange<float>(0.5f, 5f)));
 
             DevCommands = config.Bind("Debug", "DevCommands", false,

@@ -12,6 +12,12 @@ namespace GWYFVR
         {
             VRInput.Create();
 
+            // The headset compositor usually has focus, not the game window. Keep reading input and
+            // running at full speed anyway.
+            UnityEngine.InputSystem.InputSystem.settings.backgroundBehavior =
+                UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;
+            Application.runInBackground = true;
+
             var rig = new GameObject("VRRig");
             rig.transform.SetParent(transform, false);
 

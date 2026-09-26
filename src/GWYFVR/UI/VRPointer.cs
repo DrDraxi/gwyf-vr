@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.InputSystem.XR;
 
 namespace GWYFVR.UI
 {
@@ -104,9 +105,9 @@ namespace GWYFVR.UI
             var ui = WorldSpaceUI.Instance;
             var visible = rig != null && rig.Source != null;
 
-            leftHand.gameObject.SetActive(visible);
-            rightHand.gameObject.SetActive(visible);
-            if (!visible)
+            leftHand.gameObject.SetActive(visible && XRController.leftHand != null);
+            rightHand.gameObject.SetActive(visible && XRController.rightHand != null);
+            if (!visible || (LeftHanded ? XRController.leftHand : XRController.rightHand) == null)
             {
                 laser.enabled = false;
                 hitDot.gameObject.SetActive(false);

@@ -7,7 +7,10 @@ using GWYFVR.UI;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Collections;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
 
 namespace GWYFVR
@@ -19,13 +22,18 @@ namespace GWYFVR
     ///   dump               logs the VR camera, source camera and converted canvases
     ///   capture [file]     renders what the headset sees (one eye, with UI) to BepInEx/gwyfvr-capture.png
     ///   buttons            logs every clickable button
+    ///   key Name [seconds] holds a keyboard key (Input System Key name)
+    ///   turn degrees       turns the VR rig to face a world yaw
     ///   click text         clicks the first active button whose name or label contains text (=name for exact)
     /// </summary>
     internal class DevCommands : MonoBehaviour
     {
         private static string CommandFile => Path.Combine(Paths.BepInExRootPath, "gwyfvr-command.txt");
 
+        private static DevCommands Instance;
         private float nextCheck;
+
+        private void Awake() => Instance = this;
 
         private void Update()
         {
@@ -87,6 +95,17 @@ namespace GWYFVR
                     Click(args.Length > 1 ? args[1] : "");
                     break;
 
+                case "key":
+                    var parts = args.Length > 1 ? args[1].Split(' ') : new string[0];
+                    var key = (Key)Enum.Parse(typeof(Key), parts[0], true);
+                    var seconds = parts.Length > 1 ? float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture) : 0.15f;
+                    Instance.StartCoroutine(HoldKey(key, seconds));
+                    break;
+
+                case "turn":
+                    VRRig.Instance?.FaceYaw(float.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture));
+                    break;
+
                 case "dump":
                     Plugin.Log.LogInfo(Dump());
                     break;
@@ -95,6 +114,23 @@ namespace GWYFVR
                     Plugin.Log.LogWarning($"Unknown dev command '{args[0]}'");
                     break;
             }
+        }
+
+        private static IEnumerator HoldKey(Key key, float seconds)
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard == null)
+                yield break;
+
+            Plugin.Log.LogInfo($"Holding {key} for {seconds}s");
+            var end = Time.unscaledTime + seconds;
+            while (Time.unscaledTime < end)
+            {
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(key));
+                yield return null;
+            }
+
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
         }
 
         private static string Label(Component button)
@@ -178,6 +214,8 @@ namespace GWYFVR
             var rig = VRRig.Instance;
             if (rig != null)
             {
+                if (LocalPlayer.Head != null)
+                    sb.AppendLine($"Local head rot {LocalPlayer.Head.transform.eulerAngles} state {LocalPlayer.Controller.State} locked {LocalPlayer.Controller.IsLocked} body pos {LocalPlayer.Controller.transform.position}");
                 sb.AppendLine($"Rig pos {rig.transform.position} rot {rig.transform.eulerAngles}, player mode {rig.PlayerMode}");
                 sb.AppendLine($"VR camera pos {rig.VRCamera.transform.position} rot {rig.VRCamera.transform.eulerAngles} mask {rig.VRCamera.cullingMask:X}");
                 if (rig.Source != null)
