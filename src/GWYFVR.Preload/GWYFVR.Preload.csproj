@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>GWYFVR.Preload</AssemblyName>
+    <RootNamespace>GWYFVR.Preload</RootNamespace>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="$(GameDir)\BepInEx\core\BepInEx.dll;$(GameDir)\BepInEx\core\Mono.Cecil.dll">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

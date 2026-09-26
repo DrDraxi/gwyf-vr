@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GWYFVR.Preload/GWYFVR.Preload.csproj" />
+    <Project Path="src/GWYFVR/GWYFVR.csproj" />
+  </Folder>
+</Solution>

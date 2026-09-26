@@ -1,0 +1,24 @@
+# Build output
+bin/
+obj/
+dist/
+*.user
+
+# Generated OpenXR runtime dependencies (see README "Building")
+lib/
+
+# Unity helper project
+UnityProject/Library/
+UnityProject/Temp/
+UnityProject/Logs/
+UnityProject/UserSettings/
+UnityProject/Build/
+UnityProject/Assets/Empty.unity*
+UnityProject/*.csproj
+UnityProject/*.sln
+UnityProject/.vs/
+UnityProject/.idea/
+
+.vs/
+.idea/
+UnityProject/.vscode/
