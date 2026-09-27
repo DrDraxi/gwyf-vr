@@ -14,7 +14,7 @@ $patcher = Join-Path $GameDir "BepInEx\patchers\GWYFVR"
 New-Item -ItemType Directory -Force "$plugin\RuntimeDeps", $patcher | Out-Null
 
 Copy-Item "$root\src\GWYFVR\bin\$Configuration\netstandard2.1\GWYFVR.dll" $plugin -Force
-Copy-Item "$root\lib\RuntimeDeps\*" "$plugin\RuntimeDeps" -Force
+Copy-Item "$root\lib\RuntimeDeps\*" "$plugin\RuntimeDeps" -Recurse -Force
 Copy-Item "$root\src\GWYFVR.Preload\bin\$Configuration\netstandard2.1\GWYFVR.Preload.dll" $patcher -Force
 
 Write-Host "Deployed to $GameDir"

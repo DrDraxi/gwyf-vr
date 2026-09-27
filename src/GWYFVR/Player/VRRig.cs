@@ -44,7 +44,9 @@ namespace GWYFVR.Player
             var cameraObject = new GameObject("VRCamera");
             cameraObject.transform.SetParent(transform, false);
             VRCamera = cameraObject.AddComponent<Camera>();
-            VRCamera.stereoTargetEye = StereoTargetEyeMask.Both;
+            // The game's render pipeline can't draw to the headset itself (see XRSubmitter), so this
+            // camera only draws the desktop view. It still defines the head pose and render settings.
+            VRCamera.stereoTargetEye = StereoTargetEyeMask.None;
             VRCamera.nearClipPlane = 0.02f;
             VRCamera.enabled = false;
             XRDevice.DisableAutoXRCameraTracking(VRCamera, true);
@@ -148,7 +150,8 @@ namespace GWYFVR.Player
             to.allowMSAA = from.allowMSAA;
             to.useOcclusionCulling = from.useOcclusionCulling;
             to.targetTexture = null;
-            to.stereoTargetEye = StereoTargetEyeMask.Both;
+            to.fieldOfView = from.fieldOfView;
+            to.stereoTargetEye = StereoTargetEyeMask.None;
 
             var src = from.GetUniversalAdditionalCameraData();
             var dst = to.GetUniversalAdditionalCameraData();
@@ -165,8 +168,7 @@ namespace GWYFVR.Player
             dst.dithering = src.dithering;
             dst.allowXRRendering = true;
 
-            if (RendererIndexField != null)
-                RendererIndexField.SetValue(dst, RendererIndexField.GetValue(src));
+            CopyRenderer(src, dst);
 
             dst.cameraStack.Clear();
             foreach (var overlay in src.cameraStack)
@@ -174,6 +176,12 @@ namespace GWYFVR.Player
                     dst.cameraStack.Add(overlay);
 
             UI.WorldSpaceUI.Instance?.AttachOverlayCamera(to);
+        }
+
+        internal static void CopyRenderer(UniversalAdditionalCameraData from, UniversalAdditionalCameraData to)
+        {
+            if (RendererIndexField != null)
+                RendererIndexField.SetValue(to, RendererIndexField.GetValue(from));
         }
 
         /// <summary>

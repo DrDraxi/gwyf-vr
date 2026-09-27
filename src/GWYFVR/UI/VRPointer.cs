@@ -28,12 +28,15 @@ namespace GWYFVR.UI
         private void Awake()
         {
             var hand = LeftHanded ? "{LeftHand}" : "{RightHand}";
-            pointerPosition = new InputAction("VRPointerPosition", InputActionType.PassThrough,
-                $"<XRController>{hand}/pointerPosition", expectedControlType: "Vector3");
-            pointerRotation = new InputAction("VRPointerRotation", InputActionType.PassThrough,
-                $"<XRController>{hand}/pointerRotation", expectedControlType: "Quaternion");
-            pointerPosition.Enable();
-            pointerRotation.Enable();
+            // InputActionReference only works for actions that live in an asset.
+            var asset = ScriptableObject.CreateInstance<InputActionAsset>();
+            asset.hideFlags = HideFlags.HideAndDontSave;
+            var map = asset.AddActionMap("VRPointer");
+            pointerPosition = map.AddAction("VRPointerPosition", InputActionType.PassThrough,
+                $"<XRController>{hand}/pointerPosition", expectedControlLayout: "Vector3");
+            pointerRotation = map.AddAction("VRPointerRotation", InputActionType.PassThrough,
+                $"<XRController>{hand}/pointerRotation", expectedControlLayout: "Quaternion");
+            map.Enable();
 
             var material = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("UI/Default"));
 

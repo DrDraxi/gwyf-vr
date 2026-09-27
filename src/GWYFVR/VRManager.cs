@@ -24,6 +24,7 @@ namespace GWYFVR
             // WorldSpaceUI first, the rig adds its overlay camera to the headset camera.
             gameObject.AddComponent<WorldSpaceUI>();
             rig.AddComponent<VRRig>();
+            rig.AddComponent<XRSubmitter>();
             gameObject.AddComponent<VRPointer>();
             gameObject.AddComponent<GazeDot>();
 

@@ -85,6 +85,10 @@ namespace GWYFVR
                     Capture(args.Length > 1 ? args[1] : Path.Combine(Paths.BepInExRootPath, "gwyfvr-capture.png"));
                     break;
 
+                case "xrcapture":
+                    XRSubmitter.CaptureFile = args.Length > 1 ? args[1] : Path.Combine(Paths.BepInExRootPath, "gwyfvr-xrcapture.png");
+                    break;
+
                 case "buttons":
                     foreach (var button in FindObjectsByType<Button>(FindObjectsSortMode.None))
                         if (button.isActiveAndEnabled)
@@ -211,9 +215,21 @@ namespace GWYFVR
             var sb = new StringBuilder("State dump\n");
             sb.AppendLine($"Scene: {SceneManager.GetActiveScene().name}");
 
+            sb.AppendLine($"XR device active {UnityEngine.XR.XRSettings.isDeviceActive} eye {UnityEngine.XR.XRSettings.eyeTextureWidth}x{UnityEngine.XR.XRSettings.eyeTextureHeight} mode {UnityEngine.XR.XRSettings.stereoRenderingMode}");
+            var displays = new System.Collections.Generic.List<UnityEngine.XR.XRDisplaySubsystem>();
+            SubsystemManager.GetSubsystems(displays);
+            foreach (var d in displays)
+            {
+                d.TryGetDroppedFrameCount(out var dropped);
+                d.TryGetFramePresentCount(out var presented);
+                sb.AppendLine($"XR display running {d.running} passes {d.GetRenderPassCount()} presented {presented} dropped {dropped}");
+            }
+
             var rig = VRRig.Instance;
             if (rig != null)
             {
+                sb.AppendLine($"Frames submitted {rig.GetComponent<XRSubmitter>()?.FramesSubmitted}");
+                sb.AppendLine($"VR camera stereo {rig.VRCamera.stereoEnabled} active {rig.VRCamera.isActiveAndEnabled}");
                 if (LocalPlayer.Head != null)
                     sb.AppendLine($"Local head rot {LocalPlayer.Head.transform.eulerAngles} state {LocalPlayer.Controller.State} locked {LocalPlayer.Controller.IsLocked} body pos {LocalPlayer.Controller.transform.position}");
                 sb.AppendLine($"Rig pos {rig.transform.position} rot {rig.transform.eulerAngles}, player mode {rig.PlayerMode}");
