@@ -79,6 +79,9 @@ namespace GWYFVR
 
             VREnabled = true;
 
+            if (!XR.URPXRSetup.TryInitialize(Path.Combine(Path.GetDirectoryName(Info.Location)!, "RuntimeDeps")))
+                Log.LogWarning("Falling back to rendering the eyes manually (experimental)");
+
             new Harmony(Guid).PatchAll(typeof(Plugin).Assembly);
 
             var manager = new GameObject("GWYFVR");

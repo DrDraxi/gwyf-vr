@@ -118,7 +118,7 @@ namespace GWYFVR.Player
             FramesSubmitted++;
         }
 
-        private static void CaptureTarget(XRDisplaySubsystem.XRRenderPass pass, int slice)
+        internal static void CaptureTarget(XRDisplaySubsystem.XRRenderPass pass, int slice)
         {
             var file = CaptureFile;
             CaptureFile = null;

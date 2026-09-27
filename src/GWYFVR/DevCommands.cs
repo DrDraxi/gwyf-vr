@@ -87,6 +87,8 @@ namespace GWYFVR
 
                 case "xrcapture":
                     XRSubmitter.CaptureFile = args.Length > 1 ? args[1] : Path.Combine(Paths.BepInExRootPath, "gwyfvr-xrcapture.png");
+                    if (XR.URPXRSetup.Active)
+                        Instance.StartCoroutine(CaptureHeadsetAtEndOfFrame());
                     break;
 
                 case "buttons":
@@ -135,6 +137,22 @@ namespace GWYFVR
             }
 
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+        }
+
+        /// <summary>With URP rendering to the headset, read its first eye target back after the frame rendered.</summary>
+        private static IEnumerator CaptureHeadsetAtEndOfFrame()
+        {
+            yield return new WaitForEndOfFrame();
+            var displays = new System.Collections.Generic.List<UnityEngine.XR.XRDisplaySubsystem>();
+            SubsystemManager.GetSubsystems(displays);
+            if (displays.Count == 0 || displays[0].GetRenderPassCount() == 0)
+            {
+                Plugin.Log.LogWarning("No XR render pass to capture");
+                yield break;
+            }
+
+            displays[0].GetRenderPass(0, out var pass);
+            XRSubmitter.CaptureTarget(pass, 0);
         }
 
         private static string Label(Component button)

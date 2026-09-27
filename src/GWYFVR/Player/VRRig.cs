@@ -37,6 +37,13 @@ namespace GWYFVR.Player
         private static readonly FieldInfo RendererIndexField =
             typeof(UniversalAdditionalCameraData).GetField("m_RendererIndex", BindingFlags.Instance | BindingFlags.NonPublic);
 
+        /// <summary>
+        /// With URP's XR system running the camera renders straight to the headset. Otherwise
+        /// XRSubmitter renders the eyes and this camera only draws the desktop view.
+        /// </summary>
+        internal static StereoTargetEyeMask HeadsetEyes =>
+            XR.URPXRSetup.Active ? StereoTargetEyeMask.Both : StereoTargetEyeMask.None;
+
         private void Awake()
         {
             Instance = this;
@@ -44,9 +51,7 @@ namespace GWYFVR.Player
             var cameraObject = new GameObject("VRCamera");
             cameraObject.transform.SetParent(transform, false);
             VRCamera = cameraObject.AddComponent<Camera>();
-            // The game's render pipeline can't draw to the headset itself (see XRSubmitter), so this
-            // camera only draws the desktop view. It still defines the head pose and render settings.
-            VRCamera.stereoTargetEye = StereoTargetEyeMask.None;
+            VRCamera.stereoTargetEye = HeadsetEyes;
             VRCamera.nearClipPlane = 0.02f;
             VRCamera.enabled = false;
             XRDevice.DisableAutoXRCameraTracking(VRCamera, true);
@@ -151,7 +156,7 @@ namespace GWYFVR.Player
             to.useOcclusionCulling = from.useOcclusionCulling;
             to.targetTexture = null;
             to.fieldOfView = from.fieldOfView;
-            to.stereoTargetEye = StereoTargetEyeMask.None;
+            to.stereoTargetEye = HeadsetEyes;
 
             var src = from.GetUniversalAdditionalCameraData();
             var dst = to.GetUniversalAdditionalCameraData();
