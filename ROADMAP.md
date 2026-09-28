@@ -26,6 +26,8 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Hand-aimed Quota Gun, Taser, Golden Chip, ping and Hi-Lo slider.
 - Drunk wobble and motion blur off in VR, immunity bloom toned down from 5 to 1.5.
 - Physical bat swing: hand speed turns on the bat's hit area.
+- Grab items by touching them with either hand (laser as fallback); bet slider follows the hand.
+- Drunk wobble kept by default, with a VR setting to turn it off.
 - Full-screen screens (loading, round end, game over) surround you on a sphere; hold right A to skip.
 - No more magenta lens outline at the world origin (XR occlusion mesh off).
 - Game window mirrors the left eye in game; VR logo on the main and pause menus.

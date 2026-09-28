@@ -20,7 +20,7 @@ Play **Gamble With Your Friends** in VR. Your friends can stay on flat screens, 
 | Jump | Right stick click |
 | Climb out of the spawn box | Right A |
 | Voice: push-to-talk (or mute toggle with open mic) | Right B |
-| Pick up and hold an item | Point at it, hold grip (either hand) |
+| Pick up and hold an item | Touch it or point at it, hold grip (either hand) |
 | Throw | Swing and let go of the grip |
 | Drop | Let go of the grip slowly |
 | Use a machine, button, slot | Point at it, press or hold trigger |
