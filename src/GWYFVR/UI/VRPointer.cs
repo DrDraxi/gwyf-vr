@@ -25,6 +25,9 @@ namespace GWYFVR.UI
 
         public bool IsPointingAtMenu { get; private set; }
 
+        /// <summary>True while the pointing controller is tracked and the pointer camera follows it.</summary>
+        public bool HandTracked { get; private set; }
+
         private Mouse mouse;
         private LineRenderer laser;
         private Transform leftHand;
@@ -133,25 +136,33 @@ namespace GWYFVR.UI
             leftHand.gameObject.SetActive(leftTracked && !gameHands);
             rightHand.gameObject.SetActive(rightTracked && !gameHands);
 
-            var pointer = LeftHanded ? leftHand : rightHand;
             IsPointingAtMenu = false;
+            HandTracked = false;
 
-            if (!(LeftHanded ? leftTracked : rightTracked))
+            if (origin == null || !XRControllers.TryGetPointerPose(LeftHanded ? XRNode.LeftHand : XRNode.RightHand, out var aimPos, out var aimRot))
             {
                 laser.enabled = false;
                 hitDot.gameObject.SetActive(false);
                 return;
             }
 
-            PointerCamera.transform.SetPositionAndRotation(pointer.position, pointer.rotation);
-
-            var ray = new Ray(pointer.position, pointer.forward);
+            HandTracked = true;
+            // The pointer camera is also what in-game interaction aims with (see InteractionPatches).
+            PointerCamera.transform.SetPositionAndRotation(origin.TransformPoint(aimPos), origin.rotation * aimRot);
+            var ray = new Ray(PointerCamera.transform.position, PointerCamera.transform.forward);
             var hit = Vector3.zero;
             IsPointingAtMenu = ui != null && ui.Raycast(ray, out hit);
 
-            laser.enabled = IsPointingAtMenu;
+            // In game, show a short laser for aiming interactions with the hand.
+            var inGame = !IsPointingAtMenu && rig.PlayerMode && Plugin.Settings.HandInteraction.Value;
+            if (inGame)
+                hit = Physics.Raycast(ray, out var worldHit, 3f, ~(1 << WorldSpaceUI.Layer), QueryTriggerInteraction.Ignore)
+                    ? worldHit.point
+                    : ray.GetPoint(3f);
+
+            laser.enabled = IsPointingAtMenu || inGame;
             hitDot.gameObject.SetActive(IsPointingAtMenu);
-            if (!IsPointingAtMenu)
+            if (!laser.enabled)
                 return;
 
             laser.SetPosition(0, ray.origin);
@@ -164,8 +175,7 @@ namespace GWYFVR.UI
             if (!XRControllers.TryGetAimPose(node, out var position, out var rotation))
                 return false;
 
-            // Tilt the grip pose down a little so the laser comes out of the controller like a pointer.
-            hand.SetPositionAndRotation(origin.TransformPoint(position), origin.rotation * rotation * Quaternion.Euler(35f, 0f, 0f));
+            hand.SetPositionAndRotation(origin.TransformPoint(position), origin.rotation * rotation);
             return true;
         }
     }

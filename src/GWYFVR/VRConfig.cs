@@ -28,6 +28,8 @@ namespace GWYFVR
         public readonly ConfigEntry<float> SnapTurnAngle;
         public readonly ConfigEntry<float> SmoothTurnSpeed;
         public readonly ConfigEntry<bool> LeftHandedPointer;
+        public readonly ConfigEntry<float> LaserPitch;
+        public readonly ConfigEntry<bool> HandInteraction;
 
         public readonly ConfigEntry<Vector3> HandRotation;
         public readonly ConfigEntry<Vector3> HandPosition;
@@ -61,6 +63,10 @@ namespace GWYFVR
                 new ConfigDescription("Degrees per snap turn.", new AcceptableValueRange<float>(10f, 90f)));
             SmoothTurnSpeed = config.Bind("Controls", "SmoothTurnSpeed", 120f,
                 new ConfigDescription("Degrees per second for smooth turning.", new AcceptableValueRange<float>(30f, 360f)));
+            LaserPitch = config.Bind("Controls", "LaserPitch", 35f,
+                new ConfigDescription("Degrees the laser points down from the controller grip, used when the runtime gives no pointer pose.", new AcceptableValueRange<float>(-90f, 90f)));
+            HandInteraction = config.Bind("Controls", "HandInteraction", true,
+                "Aim interaction (picking up, pressing buttons) with the right controller instead of your head.");
             LeftHandedPointer = config.Bind("Controls", "LeftHandedPointer", false,
                 "Use the left controller as the menu pointer.");
 

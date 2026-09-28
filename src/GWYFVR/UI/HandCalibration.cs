@@ -15,7 +15,7 @@ namespace GWYFVR.UI
         private bool visible;
 
         private void Awake() => instance = this;
-        private Rect window = new Rect(20, 20, 420, 380);
+        private Rect window = new Rect(20, 20, 420, 440);
 
         private void Update()
         {
@@ -46,6 +46,9 @@ namespace GWYFVR.UI
             VRHands.RotationOffset = Vector3Sliders("Hand rotation", VRHands.RotationOffset, -180f, 180f, 1f);
             VRHands.PositionOffset = Vector3Sliders("Hand position (m)", VRHands.PositionOffset, -0.3f, 0.3f, 0.005f);
             VRHands.ItemOffset = Vector3Sliders("Item offset (m)", VRHands.ItemOffset, -0.3f, 0.3f, 0.005f);
+
+            GUILayout.Label($"Laser pitch: {Plugin.Settings.LaserPitch.Value:0}");
+            Plugin.Settings.LaserPitch.Value = Mathf.Round(GUILayout.HorizontalSlider(Plugin.Settings.LaserPitch.Value, -90f, 90f));
 
             if (GUILayout.Button("Reset to defaults"))
             {

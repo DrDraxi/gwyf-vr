@@ -56,6 +56,39 @@ namespace GWYFVR.Input
             Right = ControllerState.Read(XRNode.RightHand);
         }
 
+        private static readonly InputFeatureUsage<Vector3> PointerPosition = new InputFeatureUsage<Vector3>("PointerPosition");
+        private static readonly InputFeatureUsage<Quaternion> PointerRotation = new InputFeatureUsage<Quaternion>("PointerRotation");
+        private static bool loggedUsages;
+
+        /// <summary>
+        /// The controller's pointing pose (OpenXR "aim" pose) when the runtime provides it; otherwise the
+        /// grip pose tilted by the configured laser pitch.
+        /// </summary>
+        public static bool TryGetPointerPose(XRNode node, out Vector3 position, out Quaternion rotation)
+        {
+            var device = InputDevices.GetDeviceAtXRNode(node);
+            position = default;
+            rotation = Quaternion.identity;
+            if (!device.isValid)
+                return false;
+
+            if (!loggedUsages)
+            {
+                loggedUsages = true;
+                var usages = new System.Collections.Generic.List<InputFeatureUsage>();
+                if (device.TryGetFeatureUsages(usages))
+                    Plugin.Log.LogInfo($"Controller features: {string.Join(", ", System.Linq.Enumerable.Select(usages, u => u.name))}");
+            }
+
+            if (device.TryGetFeatureValue(PointerPosition, out position) && device.TryGetFeatureValue(PointerRotation, out rotation))
+                return true;
+
+            if (!TryGetAimPose(node, out position, out rotation))
+                return false;
+            rotation *= Quaternion.Euler(Plugin.Settings.LaserPitch.Value, 0f, 0f);
+            return true;
+        }
+
         public static bool TryGetAimPose(XRNode node, out Vector3 position, out Quaternion rotation)
         {
             var device = InputDevices.GetDeviceAtXRNode(node);
