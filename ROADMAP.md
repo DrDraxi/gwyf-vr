@@ -20,7 +20,8 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Body part machine: missing eye patched per eye; rolling head stays upright.
 - Menu scrolling with the stick, grab only on a fresh grip press.
 - Controls: jump on right stick click, sprint toggle on left stick click, ping on right A, emote wheel
-  on left A with stick selection.
+  on left A with stick selection; right B is voice (push-to-talk, or mute toggle with open mic),
+  crouch is no longer mapped.
 - Emote wheel on the left hand, sized to taste.
 - Hand-aimed Quota Gun, Taser, Golden Chip, ping and Hi-Lo slider.
 - Drunk wobble and motion blur off in VR, immunity bloom toned down from 5 to 1.5.
