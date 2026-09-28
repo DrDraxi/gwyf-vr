@@ -55,6 +55,10 @@ namespace GWYFVR.Player
             Place(rightPatch, active && RightBlind, XRCommonUsages.rightEyePosition, 1f, rig);
         }
 
+        /// <summary>
+        /// The patch is a child of the headset camera, so it moves exactly with your head in the same
+        /// frame (placing it in world space made it lag behind turns and walking).
+        /// </summary>
         private static void Place(Transform patch, bool show, InputFeatureUsage<Vector3> eyeUsage, float side, VRRig rig)
         {
             patch.gameObject.SetActive(show);
@@ -62,14 +66,20 @@ namespace GWYFVR.Player
                 return;
 
             var head = rig.VRCamera.transform;
-            var hmd = InputDevices.GetDeviceAtXRNode(XRNode.CenterEye);
-            Vector3 eye;
-            if (hmd.isValid && hmd.TryGetFeatureValue(eyeUsage, out var local))
-                eye = rig.transform.TransformPoint(local);
-            else
-                eye = head.position + head.right * (0.032f * side);
+            if (patch.parent != head)
+                patch.SetParent(head, false);
 
-            patch.SetPositionAndRotation(eye + head.forward * Distance, head.rotation);
+            // Eye offset from the centre of the head, in head space.
+            var offset = new Vector3(0.032f * side, 0f, 0f);
+            var hmd = InputDevices.GetDeviceAtXRNode(XRNode.CenterEye);
+            if (hmd.isValid && hmd.TryGetFeatureValue(eyeUsage, out var eye) &&
+                hmd.TryGetFeatureValue(XRCommonUsages.centerEyePosition, out var center) &&
+                hmd.TryGetFeatureValue(XRCommonUsages.centerEyeRotation, out var rotation))
+                offset = Quaternion.Inverse(rotation) * (eye - center);
+
+            patch.localPosition = offset + Vector3.forward * Distance;
+            patch.localRotation = Quaternion.identity;
+            patch.localScale = Vector3.one * Size;
         }
     }
 
