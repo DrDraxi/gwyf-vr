@@ -79,6 +79,7 @@ namespace GWYFVR.UI
 
         private void OnDestroy()
         {
+            SetDesktopMice(true);
             if (mouse != null)
                 InputSystem.RemoveDevice(mouse);
         }
@@ -117,6 +118,11 @@ namespace GWYFVR.UI
                 }
             }
 
+            // The desktop mouse would take over the menu pointer whenever it moves (e.g. while typing to
+            // someone on the PC), making clicks land away from the laser. It is only needed for the
+            // calibration sliders.
+            SetDesktopMice(HandCalibration.Visible);
+
             // Leave the real mouse alone while the calibration sliders are open.
             if (HandCalibration.Visible)
                 return;
@@ -132,6 +138,20 @@ namespace GWYFVR.UI
                 }
                 .WithButton(MouseButton.Left, controller.Trigger && IsPointingAtMenu);
             InputSystem.QueueStateEvent(mouse, state);
+        }
+
+        private void SetDesktopMice(bool enable)
+        {
+            foreach (var device in InputSystem.devices)
+            {
+                if (!(device is Mouse) || device == mouse || device.enabled == enable)
+                    continue;
+                if (enable)
+                    InputSystem.EnableDevice(device);
+                else
+                    InputSystem.DisableDevice(device);
+                Plugin.Log.LogInfo($"{(enable ? "Enabled" : "Disabled")} desktop mouse '{device.name}'");
+            }
         }
 
         private void LateUpdate()
