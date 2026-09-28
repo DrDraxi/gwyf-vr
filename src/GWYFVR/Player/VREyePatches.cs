@@ -14,6 +14,7 @@ namespace GWYFVR.Player
     {
         private const float Distance = 0.022f;
         private const float Size = 0.07f;
+        private const float CentreOpacity = 0.85f;
 
         public static bool LeftBlind;
         public static bool RightBlind;
@@ -23,13 +24,34 @@ namespace GWYFVR.Player
 
         private void Awake()
         {
-            // Drawn by the UI overlay camera, after the UI, so nothing (menus, outlines) shows through.
-            var material = UI.VRMaterials.Unlit(Color.black);
+            // Drawn by the UI overlay camera, after the UI. Mostly dark with a vignette, so the lost eye
+            // still sees a little of the world instead of pure black.
+            var material = new Material(Shader.Find("UI/Default")) { mainTexture = VignetteTexture(), color = Color.white };
             material.renderQueue = 5000;
-            if (material.HasProperty("_ZTest"))
-                material.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+            material.SetInt("unity_GUIZTestMode", (int)UnityEngine.Rendering.CompareFunction.Always);
             leftPatch = CreatePatch("VRLeftEyePatch", material);
             rightPatch = CreatePatch("VRRightEyePatch", material);
+        }
+
+        /// <summary>Black, 85% opaque in the middle, fading to fully black at the edges.</summary>
+        private static Texture2D VignetteTexture()
+        {
+            const int size = 128;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            var pixels = new Color32[size * size];
+            for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+            {
+                var dx = (x + 0.5f) / size - 0.5f;
+                var dy = (y + 0.5f) / size - 0.5f;
+                var r = Mathf.Sqrt(dx * dx + dy * dy) * 2f;
+                var alpha = Mathf.Lerp(CentreOpacity, 1f, Mathf.SmoothStep(0.25f, 0.9f, r));
+                pixels[y * size + x] = new Color32(0, 0, 0, (byte)(alpha * 255f));
+            }
+            texture.SetPixels32(pixels);
+            texture.Apply();
+            texture.hideFlags = HideFlags.HideAndDontSave;
+            return texture;
         }
 
         private Transform CreatePatch(string name, Material material)
