@@ -12,7 +12,6 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 
 - Emote wheel on the left hand: check in the headset that it sits well above the controller, that the
   dark full-screen backdrop is gone, and that stick directions line up with the emotes.
-- Game window: check it now mirrors the headset view in game (the flat UI camera is switched off).
 - Optional: a smoothed flat spectator camera for the game window instead of the raw eye view.
 - Grip/trigger fresh-press detection is per active hand; pressing the other hand while one is held can be missed.
 
@@ -24,6 +23,7 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Menu scrolling with the stick, grab only on a fresh grip press.
 - Controls: jump on right stick click, sprint toggle on left stick click, ping on right A, emote wheel
   on left A with stick selection.
+- Game window mirrors the left eye in game; VR logo on the main and pause menus.
 
 ## Done in 0.2.0-alpha
 - VR rendering, head tracking, turning, room-scale, controller hands, grab/throw, laser pointer, menus/HUD.
