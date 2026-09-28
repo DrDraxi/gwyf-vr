@@ -26,7 +26,7 @@ namespace GWYFVR.UI
         public bool IsPointingAtMenu { get; private set; }
 
         /// <summary>Mouse wheel units per second at full stick.</summary>
-        private const float MenuScrollSpeed = 1500f;
+        private const float MenuScrollSpeed = 600f;
 
         /// <summary>True while the pointing controller is tracked and the pointer camera follows it.</summary>
         public bool HandTracked { get; private set; }
