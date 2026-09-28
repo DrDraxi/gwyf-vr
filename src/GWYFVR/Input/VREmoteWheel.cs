@@ -35,6 +35,10 @@ namespace GWYFVR.Input
 
             if (pressed)
             {
+                // Closing with A cancels: clear the wheel's selection so the game plays nothing.
+                var wheel = Object.FindAnyObjectByType<EmoteWheelController>();
+                if (wheel != null && wheel.radialMenu != null)
+                    wheel.radialMenu.index = -1;
                 SetOpen(false);
                 return;
             }
