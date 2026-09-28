@@ -39,8 +39,9 @@ namespace GWYFVR.Player
         /// </summary>
         private static Texture2D VignetteTexture()
         {
-            const int size = 128;
-            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            const int size = 1024;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, true)
+                { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Trilinear, anisoLevel = 4 };
             var pixels = new Color32[size * size];
             for (var y = 0; y < size; y++)
             for (var x = 0; x < size; x++)
@@ -49,8 +50,8 @@ namespace GWYFVR.Player
                 var dy = (y + 0.5f) / size - 0.5f;
                 var r = Mathf.Sqrt(dx * dx + dy * dy) * 2f;
                 var alpha = Mathf.Lerp(CentreOpacity, 1f, Mathf.SmoothStep(0.25f, 0.9f, r));
-                if (InPlus(dx, dy))
-                    alpha = 1f;
+                // Smooth edge about a pixel wide, so the plus stays crisp instead of stair-stepped.
+                alpha = Mathf.Lerp(alpha, 1f, Mathf.Clamp01(0.5f - PlusDistance(dx, dy) * size));
                 pixels[y * size + x] = new Color32(0, 0, 0, (byte)(alpha * 255f));
             }
             texture.SetPixels32(pixels);
@@ -59,19 +60,21 @@ namespace GWYFVR.Player
             return texture;
         }
 
-        /// <summary>A plus with rounded ends, about a third of the patch across.</summary>
-        private static bool InPlus(float x, float y)
+        /// <summary>
+        /// Signed distance (in texture widths) to a plus with rounded ends, about a third of the patch
+        /// across: negative inside.
+        /// </summary>
+        private static float PlusDistance(float x, float y)
         {
             const float arm = 0.16f;
             const float half = 0.035f;
-            return Capsule(x, y, arm, half) || Capsule(y, x, arm, half);
+            return Mathf.Min(Capsule(x, y, arm) - half, Capsule(y, x, arm) - half);
         }
 
-        private static bool Capsule(float along, float across, float arm, float half)
+        private static float Capsule(float along, float across, float arm)
         {
-            var a = Mathf.Clamp(along, -arm, arm);
-            var dx = along - a;
-            return dx * dx + across * across <= half * half;
+            var dx = along - Mathf.Clamp(along, -arm, arm);
+            return Mathf.Sqrt(dx * dx + across * across);
         }
 
         private Transform CreatePatch(string name, Material material)
