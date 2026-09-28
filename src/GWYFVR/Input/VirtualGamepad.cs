@@ -11,7 +11,8 @@ namespace GWYFVR.Input
     /// Mapping (game's gamepad binding in brackets):
     ///   left stick = move [left stick], right stick click = jump [south], left stick click = sprint toggle
     ///   [left trigger] (off when you stop moving), right A = ping [right stick press] (climbs out of the
-    ///   spawn box while locked in it, holds to skip screens like game over [west]), B = crouch [east], left A = emote wheel,
+    ///   spawn box while locked in it, holds to skip screens like game over [west]), right B = voice (push-to-talk or mute,
+    ///   see VRVoice; crouch is not mapped), left A = emote wheel,
     ///   grip on an item = pick it up [west], trigger on a machine/button = interact [west],
     ///   trigger while holding = use item [right shoulder],
     ///   left B / menu = pause [start]. Throwing is physical (see VRThrowing).
@@ -83,11 +84,16 @@ namespace GWYFVR.Input
                                    triggerArmed && target != null && !targetIsItem ||
                                    locked && r.Primary) ||
                                   cutscene && r.Primary;
+            // Dragging a slider keeps hold of it while the trigger stays down, even if the hand leaves it.
+            if (!pointingAtMenu && active.Trigger && (Player.VRBetSlider.Dragging != null || Patches.HiLoSliderDrag.Dragging))
+                interactPressed = true;
 
             // The trigger of the hand holding an item uses the item.
             var useItem = !pointingAtMenu && holding && HandRoles.Holding.Trigger && !(target != null && !targetIsItem);
 
             VREmoteWheel.Update(l);
+            // Crouch (east) is dropped: right B is the voice button.
+            VRVoice.Update(r.Secondary);
 
             // Sprint toggles on with a left stick click and switches itself off when you stop moving. Clicking
             // the stick can briefly centre it, so it has to stay released for a moment to count as stopping.
@@ -111,7 +117,6 @@ namespace GWYFVR.Input
 
             state = state
                 .WithButton(GamepadButton.South, r.StickClick)
-                .WithButton(GamepadButton.East, r.Secondary)
                 .WithButton(GamepadButton.West, interactPressed)
                 .WithButton(GamepadButton.RightShoulder, useItem)
                 .WithButton(GamepadButton.RightStick, r.Primary && !locked && !cutscene)

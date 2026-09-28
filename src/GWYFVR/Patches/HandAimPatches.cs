@@ -117,6 +117,25 @@ namespace GWYFVR.Patches
         }
     }
 
+    /// <summary>Knows when the local player holds a Hi-Lo slider, so VirtualGamepad can keep hold of it.</summary>
+    [HarmonyPatch]
+    internal static class HiLoSliderDrag
+    {
+        public static bool Dragging { get; private set; }
+
+        [HarmonyPatch(typeof(HiLoSlider), nameof(HiLoSlider.OnPlayerInteract))]
+        [HarmonyPostfix]
+        private static void Start() => Dragging = true;
+
+        [HarmonyPatch(typeof(HiLoSlider), nameof(HiLoSlider.HandlePlayerInteract))]
+        [HarmonyPostfix]
+        private static void End(bool isPressed)
+        {
+            if (!isPressed)
+                Dragging = false;
+        }
+    }
+
     /// <summary>Pings land where the controller points.</summary>
     [HarmonyPatch(typeof(PlayerPingManager), nameof(PlayerPingManager.OnPing))]
     internal static class PingAimPatch
