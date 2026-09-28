@@ -244,6 +244,9 @@ namespace GWYFVR.Player
         private void HandleTurning()
         {
             XRControllers.Poll();
+            // Don't turn while scrolling a menu with the right stick.
+            if (UI.VRPointer.Instance != null && UI.VRPointer.Instance.IsPointingAtMenu && Input.HandRoles.ActiveHand == UnityEngine.XR.XRNode.RightHand)
+                return;
             var x = XRControllers.Right.Stick.x;
 
             if (Plugin.Settings.Turning.Value == TurnMode.Smooth)

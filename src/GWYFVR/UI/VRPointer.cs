@@ -25,6 +25,9 @@ namespace GWYFVR.UI
 
         public bool IsPointingAtMenu { get; private set; }
 
+        /// <summary>Mouse wheel units per second at full stick.</summary>
+        private const float MenuScrollSpeed = 1500f;
+
         /// <summary>True while the pointing controller is tracked and the pointer camera follows it.</summary>
         public bool HandTracked { get; private set; }
 
@@ -119,7 +122,14 @@ namespace GWYFVR.UI
                 return;
 
             // Keep the virtual mouse on the centre of the pointer camera, the trigger is its left button.
-            var state = new MouseState { position = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f) }
+            // The pointing hand's stick scrolls whatever menu it points at (settings lists etc.).
+            var scroll = IsPointingAtMenu && Mathf.Abs(controller.Stick.y) > 0.2f ? controller.Stick.y * MenuScrollSpeed * Time.unscaledDeltaTime : 0f;
+
+            var state = new MouseState
+                {
+                    position = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f),
+                    scroll = new Vector2(0f, scroll),
+                }
                 .WithButton(MouseButton.Left, controller.Trigger && IsPointingAtMenu);
             InputSystem.QueueStateEvent(mouse, state);
         }
