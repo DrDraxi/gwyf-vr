@@ -10,6 +10,11 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Post-processing in VR: rebuild the XR-enabled render pipeline with the exact game Unity version
   (6000.3.6f1); the 6000.3.7 build is missing a pass in the game's UberPost shader.
 
+- Cutscenes and the win scene move the view on their own (Cinemachine); show them on a big virtual screen.
+- Ragdoll, knockback, being carried and the spawn-box launch: add a comfort fade or vignette.
+- Number boxes (custom lobby, settings) need a VR keypad; zoom and pocket slots need VR buttons.
+- Still to test in the headset: hand-aimed Quota Gun/Taser/Golden Chip/Hi-Lo, bet slider, drunk toggle.
+- Release 0.3.0 on Thunderstore (only with the go-ahead).
 - Optional: a smoothed flat spectator camera for the game window instead of the raw eye view.
 - Grip/trigger fresh-press detection is per active hand; pressing the other hand while one is held can be missed.
 
@@ -28,6 +33,9 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Physical bat swing: hand speed turns on the bat's hit area.
 - Grab items by touching them with either hand (laser as fallback); bet slider follows the hand.
 - Drunk wobble kept by default, with a VR setting to turn it off.
+- Lost eye: 92.5% dark vignette with a stitched plus instead of solid black.
+- Fixed: touch grab targeted your own body (blocked all interaction); desktop mouse pulled menu clicks off
+  the laser; round end screens stand still instead of following the head.
 - Full-screen screens (loading, round end, game over) surround you on a sphere; hold right A to skip.
 - No more magenta lens outline at the world origin (XR occlusion mesh off).
 - Game window mirrors the left eye in game; VR logo on the main and pause menus.
