@@ -40,6 +40,13 @@ namespace GWYFVR.UI
 
         public IReadOnlyList<Canvas> Canvases => canvases;
 
+        /// <summary>Follows your head (smoothed) in game; the HUD lives here.</summary>
+        public Transform HudAnchor { get; private set; }
+
+        private readonly HashSet<Canvas> menus = new HashSet<Canvas>();
+        private Quaternion hudRotation = Quaternion.identity;
+        private bool hudPlaced;
+
         private readonly List<Canvas> canvases = new List<Canvas>();
         private readonly HashSet<Canvas> converted = new HashSet<Canvas>();
         private readonly Dictionary<Canvas, float> drawOrder = new Dictionary<Canvas, float>();
@@ -57,6 +64,8 @@ namespace GWYFVR.UI
 
             Anchor = new GameObject("VRUIAnchor").transform;
             Anchor.SetParent(transform, false);
+            HudAnchor = new GameObject("VRHudAnchor").transform;
+            HudAnchor.SetParent(transform, false);
 
             var overlayObject = new GameObject("VRUICamera");
             overlayObject.transform.SetParent(transform, false);
@@ -98,7 +107,8 @@ namespace GWYFVR.UI
             overlayCamera.transform.SetPositionAndRotation(rig.VRCamera.transform.position, rig.VRCamera.transform.rotation);
 
             UpdateAnchor(rig.transform, rig.VRCamera.transform);
-            PlaceCanvases();
+            UpdateHudAnchor(rig.VRCamera.transform);
+            PlaceCanvases(rig.PlayerMode);
         }
 
         /// <summary>Place the panel in front of the head, in the rig's frame so it follows a tilted menu view.</summary>
@@ -116,6 +126,20 @@ namespace GWYFVR.UI
             Anchor.SetPositionAndRotation(position, rotation);
         }
 
+        /// <summary>
+        /// The HUD follows your head with a little lag (so it doesn't feel glued to your face) and sits a
+        /// bit below the centre of your view.
+        /// </summary>
+        private void UpdateHudAnchor(Transform head)
+        {
+            var e = head.eulerAngles;
+            var target = Quaternion.Euler(e.x + Plugin.Settings.HudTilt.Value, e.y, 0f);
+            hudRotation = hudPlaced ? Quaternion.Slerp(hudRotation, target, 1f - Mathf.Exp(-8f * Time.unscaledDeltaTime)) : target;
+            hudPlaced = true;
+
+            HudAnchor.SetPositionAndRotation(head.position + hudRotation * Vector3.forward * Plugin.Settings.HudDistance.Value, hudRotation);
+        }
+
         private bool anyVisibleLastFrame;
 
         /// <summary>Recenter the panel in front of you when a menu opens while none was open.</summary>
@@ -131,10 +155,19 @@ namespace GWYFVR.UI
             return opened;
         }
 
-        private static bool HasRaycaster(Canvas canvas)
+        private bool HasRaycaster(Canvas canvas) => menus.Contains(canvas);
+
+        /// <summary>A menu is a canvas you can click something on right now; everything else is HUD.</summary>
+        private static bool IsMenu(Canvas canvas)
         {
             var raycaster = canvas.GetComponent<GraphicRaycaster>();
-            return raycaster != null && raycaster.enabled && canvas.GetComponentInChildren<Selectable>() != null;
+            if (raycaster == null || !raycaster.enabled)
+                return false;
+
+            foreach (var selectable in canvas.GetComponentsInChildren<Selectable>())
+                if (selectable.IsInteractable())
+                    return true;
+            return false;
         }
 
         private void ScanCanvases()
@@ -152,8 +185,13 @@ namespace GWYFVR.UI
             }
 
             // Canvases instantiate children at runtime which keep their prefab layer.
+            menus.Clear();
             foreach (var canvas in canvases)
+            {
                 SetLayer(canvas.transform);
+                if (canvas.isActiveAndEnabled && IsMenu(canvas))
+                    menus.Add(canvas);
+            }
         }
 
         private void Convert(Canvas canvas)
@@ -183,9 +221,10 @@ namespace GWYFVR.UI
             Plugin.Log.LogInfo($"Moved canvas '{canvas.name}' into world space");
         }
 
-        private void PlaceCanvases()
+        private void PlaceCanvases(bool inGame)
         {
-            var scale = Plugin.Settings.UIWidth.Value / VirtualScreen.x;
+            var menuScale = Plugin.Settings.UIWidth.Value / VirtualScreen.x;
+            var hudScale = Plugin.Settings.HudWidth.Value / VirtualScreen.x;
 
             // Stack canvases like the flat game draws them: by sorting order, then by draw order. Each
             // later canvas sits a little closer to the viewer so it is drawn on top.
@@ -198,12 +237,17 @@ namespace GWYFVR.UI
             for (var i = 0; i < stacked.Count; i++)
             {
                 var canvas = stacked[i];
-                var offset = -Anchor.forward * (i * 0.002f);
+                // In game, anything that isn't a clickable menu is HUD and follows your head.
+                var hud = inGame && !menus.Contains(canvas);
+                var anchor = hud ? HudAnchor : Anchor;
+                var scale = hud ? hudScale : menuScale;
+
+                var offset = -anchor.forward * (i * 0.002f);
                 if (VRPointer.Instance != null && canvas.worldCamera != VRPointer.Instance.PointerCamera)
                     canvas.worldCamera = VRPointer.Instance.PointerCamera;
 
                 var t = canvas.transform;
-                t.SetPositionAndRotation(Anchor.position + offset, Anchor.rotation);
+                t.SetPositionAndRotation(anchor.position + offset, anchor.rotation);
 
                 var parentScale = t.parent != null ? t.parent.lossyScale : Vector3.one;
                 t.localScale = new Vector3(Div(scale, parentScale.x), Div(scale, parentScale.y), Div(scale, parentScale.z));

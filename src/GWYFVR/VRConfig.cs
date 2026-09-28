@@ -42,6 +42,9 @@ namespace GWYFVR
 
         public readonly ConfigEntry<float> UIDistance;
         public readonly ConfigEntry<float> UIWidth;
+        public readonly ConfigEntry<float> HudDistance;
+        public readonly ConfigEntry<float> HudWidth;
+        public readonly ConfigEntry<float> HudTilt;
 
         public readonly ConfigEntry<bool> DevCommands;
 
@@ -97,6 +100,13 @@ namespace GWYFVR
                 new ConfigDescription("How far in front of you menus and the HUD float, in meters.", new AcceptableValueRange<float>(0.5f, 5f)));
             UIWidth = config.Bind("UI", "Width", 2.4f,
                 new ConfigDescription("Width of menus and the HUD, in meters.", new AcceptableValueRange<float>(0.5f, 5f)));
+
+            HudDistance = config.Bind("UI", "HudDistance", 1.2f,
+                new ConfigDescription("How far in front of you the in-game HUD floats, in meters.", new AcceptableValueRange<float>(0.3f, 5f)));
+            HudWidth = config.Bind("UI", "HudWidth", 1.3f,
+                new ConfigDescription("Width of the in-game HUD, in meters.", new AcceptableValueRange<float>(0.3f, 5f)));
+            HudTilt = config.Bind("UI", "HudTilt", 8f,
+                new ConfigDescription("Degrees the HUD sits below the centre of your view.", new AcceptableValueRange<float>(-30f, 45f)));
 
             DevCommands = config.Bind("Debug", "DevCommands", false,
                 "For mod development: run commands written to BepInEx/gwyfvr-command.txt (screenshot, dump).");
