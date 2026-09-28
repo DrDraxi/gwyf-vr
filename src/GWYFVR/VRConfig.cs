@@ -64,11 +64,11 @@ namespace GWYFVR
             LeftHandedPointer = config.Bind("Controls", "LeftHandedPointer", false,
                 "Use the left controller as the menu pointer.");
 
-            HandRotation = config.Bind("Hands", "Rotation", new Vector3(-30f, 90f, 180f),
+            HandRotation = config.Bind("Hands", "Rotation", new Vector3(10f, 95f, 138f),
                 "Rotation from the right controller to the right hand, in degrees (mirrored for the left hand). Tune in game with F8.");
-            HandPosition = config.Bind("Hands", "Position", new Vector3(0f, 0f, -0.08f),
+            HandPosition = config.Bind("Hands", "Position", new Vector3(0.035f, 0.05f, 0.02f),
                 "Offset from the right controller to the right hand, in meters (mirrored for the left hand).");
-            ItemOffset = config.Bind("Hands", "ItemOffset", new Vector3(0f, 0f, 0.12f),
+            ItemOffset = config.Bind("Hands", "ItemOffset", new Vector3(0.01f, 0f, 0.12f),
                 "Offset from the right controller to held items, in meters.");
 
             UIDistance = config.Bind("UI", "Distance", 1.6f,
