@@ -30,6 +30,7 @@ namespace GWYFVR
         public readonly ConfigEntry<bool> LeftHandedPointer;
         public readonly ConfigEntry<Vector3> LaserRotation;
         public readonly ConfigEntry<bool> HandInteraction;
+        public readonly ConfigEntry<bool> RoomScale;
         public readonly ConfigEntry<bool> PhysicalThrowing;
         public readonly ConfigEntry<float> ThrowStrength;
 
@@ -69,6 +70,8 @@ namespace GWYFVR
                 "Extra rotation of the laser / aiming direction relative to the controller's pointing direction, in degrees (mirrored for the left hand). Tune in game with F8.");
             HandInteraction = config.Bind("Controls", "HandInteraction", true,
                 "Aim interaction (picking up, pressing buttons) with the right controller instead of your head.");
+            RoomScale = config.Bind("Controls", "RoomScale", true,
+                "Walking and leaning in your room moves your character.");
             PhysicalThrowing = config.Bind("Controls", "PhysicalThrowing", true,
                 "Hold the right grip to keep holding an item; swing and let go to throw it.");
             ThrowStrength = config.Bind("Controls", "ThrowStrength", 1.5f,
