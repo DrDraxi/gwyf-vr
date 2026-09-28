@@ -207,10 +207,8 @@ namespace GWYFVR.Player
 
         private void HandleTurning()
         {
-            if (VRInput.Turn == null)
-                return;
-
-            var x = VRInput.Turn.ReadValue<Vector2>().x;
+            XRControllers.Poll();
+            var x = XRControllers.Right.Stick.x;
 
             if (Plugin.Settings.Turning.Value == TurnMode.Smooth)
             {

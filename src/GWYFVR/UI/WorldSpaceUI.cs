@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using GWYFVR.Input;
 using GWYFVR.Player;
 using UnityEngine;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
@@ -161,7 +160,8 @@ namespace GWYFVR.UI
             canvases.Add(canvas);
 
             canvas.renderMode = RenderMode.WorldSpace;
-            canvas.worldCamera = VRRig.Instance != null ? VRRig.Instance.VRCamera : null;
+            // Menus are hit-tested from the controller, see VRPointer.
+            canvas.worldCamera = VRPointer.Instance != null ? VRPointer.Instance.PointerCamera : null;
 
             var rect = (RectTransform)canvas.transform;
             rect.sizeDelta = VirtualScreen;
@@ -170,9 +170,6 @@ namespace GWYFVR.UI
             var scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
                 scaler.dynamicPixelsPerUnit = 1f;
-
-            if (canvas.GetComponent<GraphicRaycaster>() != null && canvas.GetComponent<TrackedDeviceRaycaster>() == null)
-                canvas.gameObject.AddComponent<TrackedDeviceRaycaster>();
 
             SetLayer(canvas.transform);
 
@@ -190,6 +187,9 @@ namespace GWYFVR.UI
 
                 // Nudge higher sorting orders slightly towards the viewer so overlapping canvases don't flicker.
                 var offset = -Anchor.forward * (Mathf.Clamp(canvas.sortingOrder, -100, 200) * 0.0005f);
+                if (VRPointer.Instance != null && canvas.worldCamera != VRPointer.Instance.PointerCamera)
+                    canvas.worldCamera = VRPointer.Instance.PointerCamera;
+
                 var t = canvas.transform;
                 t.SetPositionAndRotation(Anchor.position + offset, Anchor.rotation);
 

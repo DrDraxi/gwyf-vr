@@ -11,6 +11,7 @@ namespace GWYFVR
         private void Awake()
         {
             VRInput.Create();
+            Invoke(nameof(LogDevices), 5f);
 
             // The headset compositor usually has focus, not the game window. Keep reading input and
             // running at full speed anyway.
@@ -27,16 +28,14 @@ namespace GWYFVR
             if (!XR.URPXRSetup.Active)
                 rig.AddComponent<XRSubmitter>();
             gameObject.AddComponent<VRPointer>();
+            gameObject.AddComponent<VirtualGamepad>();
             gameObject.AddComponent<GazeDot>();
 
             if (Plugin.Settings.DevCommands.Value)
                 gameObject.AddComponent<DevCommands>();
         }
 
-        private void Update()
-        {
-            if (!GameInputBindings.Applied)
-                GameInputBindings.TryApply();
-        }
+        private void LogDevices() => VRInput.LogDevices();
+
     }
 }

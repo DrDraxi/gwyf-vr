@@ -113,6 +113,7 @@ namespace GWYFVR
                     break;
 
                 case "dump":
+                    GWYFVR.Input.VRInput.LogDevices();
                     Plugin.Log.LogInfo(Dump());
                     break;
 

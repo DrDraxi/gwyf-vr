@@ -1,42 +1,50 @@
 using GWYFVR.Input;
 using GWYFVR.Player;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.UI;
-using UnityEngine.InputSystem.XR;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.XR;
 
 namespace GWYFVR.UI
 {
     /// <summary>
-    /// Lets a controller point at and click the world space menus through the game's own
-    /// InputSystemUIInputModule, and draws simple controllers plus a laser while a menu is pointable.
+    /// Lets a controller point at and click the world space menus, and draws simple controllers plus a
+    /// laser while a menu is pointed at.
+    ///
+    /// The game's Input System has no XR support, so tracked-device UI input isn't available. Instead a
+    /// (never rendering) camera sits on the controller and is used as every menu canvas's event camera,
+    /// and a virtual mouse permanently "points" at the centre of that camera's screen. The game's normal
+    /// mouse UI handling then hits whatever the controller points at; the trigger is the mouse button.
     /// </summary>
     public class VRPointer : MonoBehaviour
     {
-        private InputAction pointerPosition;
-        private InputAction pointerRotation;
-        private InputSystemUIInputModule configuredModule;
+        public static VRPointer Instance { get; private set; }
 
+        /// <summary>Event camera placed on the pointing controller.</summary>
+        public Camera PointerCamera { get; private set; }
+
+        public bool IsPointingAtMenu { get; private set; }
+
+        private Mouse mouse;
         private LineRenderer laser;
         private Transform leftHand;
         private Transform rightHand;
         private Transform hitDot;
 
-        private bool LeftHanded => Plugin.Settings.LeftHandedPointer.Value;
+        private static bool LeftHanded => Plugin.Settings.LeftHandedPointer.Value;
 
         private void Awake()
         {
-            var hand = LeftHanded ? "{LeftHand}" : "{RightHand}";
-            // InputActionReference only works for actions that live in an asset.
-            var asset = ScriptableObject.CreateInstance<InputActionAsset>();
-            asset.hideFlags = HideFlags.HideAndDontSave;
-            var map = asset.AddActionMap("VRPointer");
-            pointerPosition = map.AddAction("VRPointerPosition", InputActionType.PassThrough,
-                $"<XRController>{hand}/pointerPosition", expectedControlLayout: "Vector3");
-            pointerRotation = map.AddAction("VRPointerRotation", InputActionType.PassThrough,
-                $"<XRController>{hand}/pointerRotation", expectedControlLayout: "Quaternion");
-            map.Enable();
+            Instance = this;
+
+            var cameraObject = new GameObject("VRPointerCamera");
+            cameraObject.transform.SetParent(transform, false);
+            PointerCamera = cameraObject.AddComponent<Camera>();
+            PointerCamera.enabled = false;
+            PointerCamera.stereoTargetEye = StereoTargetEyeMask.None;
+            PointerCamera.fieldOfView = 10f;
+            PointerCamera.nearClipPlane = 0.01f;
+            PointerCamera.cullingMask = 0;
 
             var material = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("UI/Default"));
 
@@ -63,6 +71,12 @@ namespace GWYFVR.UI
             hitDot.gameObject.layer = WorldSpaceUI.Layer;
         }
 
+        private void OnDestroy()
+        {
+            if (mouse != null)
+                InputSystem.RemoveDevice(mouse);
+        }
+
         private Transform CreateHand(string name, Material material)
         {
             var hand = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
@@ -78,72 +92,75 @@ namespace GWYFVR.UI
 
         private void Update()
         {
-            ConfigureInputModule();
-        }
+            XRControllers.Poll();
+            var controller = LeftHanded ? XRControllers.Left : XRControllers.Right;
 
-        /// <summary>
-        /// Point the game's UI input module at the controller aim pose (its defaults use the grip pose)
-        /// and tell it tracked positions are relative to the VR rig.
-        /// </summary>
-        private void ConfigureInputModule()
-        {
-            var module = EventSystem.current != null ? EventSystem.current.currentInputModule as InputSystemUIInputModule : null;
-            if (module == null || VRRig.Instance == null)
-                return;
+            // Created lazily: the Input System isn't ready yet while plugins load.
+            if (mouse == null)
+            {
+                try
+                {
+                    mouse = InputSystem.AddDevice<Mouse>("GWYFVR Pointer");
+                }
+                catch (System.Exception ex)
+                {
+                    Plugin.Log.LogWarning($"Could not add the VR pointer mouse yet: {ex.Message}");
+                    enabled = false;
+                    return;
+                }
+            }
 
-            module.xrTrackingOrigin = VRRig.Instance.transform;
-
-            if (module == configuredModule)
-                return;
-
-            module.trackedDevicePosition = InputActionReference.Create(pointerPosition);
-            module.trackedDeviceOrientation = InputActionReference.Create(pointerRotation);
-            configuredModule = module;
-            Plugin.Log.LogInfo("Configured UI input module for VR pointers");
+            // Keep the virtual mouse on the centre of the pointer camera, the trigger is its left button.
+            var state = new MouseState { position = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f) }
+                .WithButton(MouseButton.Left, controller.Trigger && IsPointingAtMenu);
+            InputSystem.QueueStateEvent(mouse, state);
         }
 
         private void LateUpdate()
         {
             var rig = VRRig.Instance;
             var ui = WorldSpaceUI.Instance;
-            var visible = rig != null && rig.Source != null;
+            var origin = rig != null ? rig.transform : null;
 
-            leftHand.gameObject.SetActive(visible && XRController.leftHand != null);
-            rightHand.gameObject.SetActive(visible && XRController.rightHand != null);
-            if (!visible || (LeftHanded ? XRController.leftHand : XRController.rightHand) == null)
+            var leftTracked = origin != null && Place(leftHand, origin, XRNode.LeftHand);
+            var rightTracked = origin != null && Place(rightHand, origin, XRNode.RightHand);
+            leftHand.gameObject.SetActive(leftTracked);
+            rightHand.gameObject.SetActive(rightTracked);
+
+            var pointer = LeftHanded ? leftHand : rightHand;
+            IsPointingAtMenu = false;
+
+            if (!(LeftHanded ? leftTracked : rightTracked))
             {
                 laser.enabled = false;
                 hitDot.gameObject.SetActive(false);
                 return;
             }
 
-            var origin = rig.transform;
-            Place(leftHand, origin, VRInput.LeftPosition, VRInput.LeftRotation);
-            Place(rightHand, origin, VRInput.RightPosition, VRInput.RightRotation);
+            PointerCamera.transform.SetPositionAndRotation(pointer.position, pointer.rotation);
 
-            var pointer = LeftHanded ? leftHand : rightHand;
             var ray = new Ray(pointer.position, pointer.forward);
+            var hit = Vector3.zero;
+            IsPointingAtMenu = ui != null && ui.Raycast(ray, out hit);
 
-            if (ui != null && ui.Raycast(ray, out var hit))
-            {
-                laser.enabled = true;
-                laser.SetPosition(0, ray.origin);
-                laser.SetPosition(1, hit);
-                hitDot.gameObject.SetActive(true);
-                hitDot.position = hit;
-            }
-            else
-            {
-                laser.enabled = false;
-                hitDot.gameObject.SetActive(false);
-            }
+            laser.enabled = IsPointingAtMenu;
+            hitDot.gameObject.SetActive(IsPointingAtMenu);
+            if (!IsPointingAtMenu)
+                return;
+
+            laser.SetPosition(0, ray.origin);
+            laser.SetPosition(1, hit);
+            hitDot.position = hit;
         }
 
-        private static void Place(Transform hand, Transform origin, InputAction position, InputAction rotation)
+        private static bool Place(Transform hand, Transform origin, XRNode node)
         {
-            hand.SetPositionAndRotation(
-                origin.TransformPoint(VRInput.ReadPosition(position)),
-                origin.rotation * VRInput.ReadRotation(rotation));
+            if (!XRControllers.TryGetAimPose(node, out var position, out var rotation))
+                return false;
+
+            // Tilt the grip pose down a little so the laser comes out of the controller like a pointer.
+            hand.SetPositionAndRotation(origin.TransformPoint(position), origin.rotation * rotation * Quaternion.Euler(35f, 0f, 0f));
+            return true;
         }
     }
 }
