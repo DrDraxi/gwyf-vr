@@ -14,7 +14,7 @@ namespace GWYFVR.Player
     {
         private const float Distance = 0.022f;
         private const float Size = 0.07f;
-        private const float CentreOpacity = 0.85f;
+        private const float CentreOpacity = 0.925f;
 
         public static bool LeftBlind;
         public static bool RightBlind;
@@ -33,7 +33,10 @@ namespace GWYFVR.Player
             rightPatch = CreatePatch("VRRightEyePatch", material);
         }
 
-        /// <summary>Black, 85% opaque in the middle, fading to fully black at the edges.</summary>
+        /// <summary>
+        /// Black, mostly opaque in the middle and fully black at the edges, with a solid plus in the
+        /// middle: the stitched-shut eye as it looks from the outside.
+        /// </summary>
         private static Texture2D VignetteTexture()
         {
             const int size = 128;
@@ -46,12 +49,29 @@ namespace GWYFVR.Player
                 var dy = (y + 0.5f) / size - 0.5f;
                 var r = Mathf.Sqrt(dx * dx + dy * dy) * 2f;
                 var alpha = Mathf.Lerp(CentreOpacity, 1f, Mathf.SmoothStep(0.25f, 0.9f, r));
+                if (InPlus(dx, dy))
+                    alpha = 1f;
                 pixels[y * size + x] = new Color32(0, 0, 0, (byte)(alpha * 255f));
             }
             texture.SetPixels32(pixels);
             texture.Apply();
             texture.hideFlags = HideFlags.HideAndDontSave;
             return texture;
+        }
+
+        /// <summary>A plus with rounded ends, about a third of the patch across.</summary>
+        private static bool InPlus(float x, float y)
+        {
+            const float arm = 0.16f;
+            const float half = 0.035f;
+            return Capsule(x, y, arm, half) || Capsule(y, x, arm, half);
+        }
+
+        private static bool Capsule(float along, float across, float arm, float half)
+        {
+            var a = Mathf.Clamp(along, -arm, arm);
+            var dx = along - a;
+            return dx * dx + across * across <= half * half;
         }
 
         private Transform CreatePatch(string name, Material material)
