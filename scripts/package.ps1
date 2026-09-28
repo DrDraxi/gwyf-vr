@@ -15,6 +15,8 @@ Copy-Item "$root\thunderstore\manifest.json", "$root\thunderstore\icon.png", "$r
 Copy-Item "$root\LICENSE" $stage -ErrorAction SilentlyContinue
 Copy-Item "$root\src\GWYFVR\bin\$Configuration\netstandard2.1\GWYFVR.dll" "$stage\plugins\GWYFVR"
 Copy-Item "$root\lib\RuntimeDeps\*" "$stage\plugins\GWYFVR\RuntimeDeps" -Recurse
+New-Item -ItemType Directory -Force "$stage\plugins\GWYFVR\Prompts" | Out-Null
+Copy-Item "$root\assets\prompts\*" "$stage\plugins\GWYFVR\Prompts"
 Copy-Item "$root\src\GWYFVR.Preload\bin\$Configuration\netstandard2.1\GWYFVR.Preload.dll" "$stage\patchers\GWYFVR"
 
 $zip = Join-Path $root "dist\GWYFVR-$version.zip"

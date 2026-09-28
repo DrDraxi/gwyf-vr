@@ -79,6 +79,8 @@ namespace GWYFVR
 
             VREnabled = true;
 
+            UI.VRPrompts.Init(Path.GetDirectoryName(Info.Location)!);
+
             if (!XR.URPXRSetup.TryInitialize(Path.Combine(Path.GetDirectoryName(Info.Location)!, "RuntimeDeps")))
                 Log.LogWarning("Falling back to rendering the eyes manually (experimental)");
 
