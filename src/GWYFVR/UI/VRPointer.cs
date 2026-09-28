@@ -110,6 +110,10 @@ namespace GWYFVR.UI
                 }
             }
 
+            // Leave the real mouse alone while the calibration sliders are open.
+            if (HandCalibration.Visible)
+                return;
+
             // Keep the virtual mouse on the centre of the pointer camera, the trigger is its left button.
             var state = new MouseState { position = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f) }
                 .WithButton(MouseButton.Left, controller.Trigger && IsPointingAtMenu);

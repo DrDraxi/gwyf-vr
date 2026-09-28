@@ -9,7 +9,12 @@ namespace GWYFVR.UI
     /// </summary>
     public class HandCalibration : MonoBehaviour
     {
+        public static bool Visible => instance != null && instance.visible;
+
+        private static HandCalibration instance;
         private bool visible;
+
+        private void Awake() => instance = this;
         private Rect window = new Rect(20, 20, 420, 380);
 
         private void Update()
@@ -17,6 +22,15 @@ namespace GWYFVR.UI
             var keyboard = UnityEngine.InputSystem.Keyboard.current;
             if (keyboard != null && keyboard.f8Key.wasPressedThisFrame)
                 visible = !visible;
+        }
+
+        /// <summary>The game locks the cursor while playing; free it while the sliders are open.</summary>
+        private void LateUpdate()
+        {
+            if (!visible)
+                return;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
         private void OnGUI()
