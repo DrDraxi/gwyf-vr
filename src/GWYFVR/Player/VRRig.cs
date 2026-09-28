@@ -33,6 +33,7 @@ namespace GWYFVR.Player
         private float turnYaw;
         private bool snapLatched;
         private float nextSourceScan;
+        private float nextStrayScan;
 
         private static readonly FieldInfo RendererIndexField =
             typeof(UniversalAdditionalCameraData).GetField("m_RendererIndex", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -80,6 +81,12 @@ namespace GWYFVR.Player
             if (Source != null && Source.enabled)
                 Source.enabled = false;
 
+            if (Time.unscaledTime >= nextStrayScan)
+            {
+                nextStrayScan = Time.unscaledTime + 1f;
+                DisableStrayScreenCameras();
+            }
+
             PlayerMode = Source != null && LocalPlayer.Head != null && Source == LocalPlayer.Camera;
 
             HandleTurning();
@@ -89,6 +96,31 @@ namespace GWYFVR.Player
         {
             UpdatePose();
         }
+
+        /// <summary>
+        /// Other game cameras that draw straight to the screen (e.g. a flat HUD camera) paint over the
+        /// headset mirror in the game window. Everything they show is already in VR, so turn them off.
+        /// </summary>
+        private void DisableStrayScreenCameras()
+        {
+            foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None))
+            {
+                if (!cam.enabled || cam.targetTexture != null || cam == VRCamera || cam == Source)
+                    continue;
+                // The mod's own cameras (VRUICamera, VRPointerCamera, ...) all start with "VR".
+                if (cam.name.StartsWith("VR") || cam.transform.IsChildOf(transform) || cam.transform.IsChildOf(VRCamera.transform))
+                    continue;
+                // Only UI cameras: a world camera may become the camera to follow later (cutscenes).
+                if (!IsFlatUICamera(cam))
+                    continue;
+
+                cam.enabled = false;
+                Plugin.Log.LogInfo($"Disabled flat screen camera '{cam.name}'");
+            }
+        }
+
+        private static bool IsFlatUICamera(Camera cam) =>
+            cam.cullingMask == 1 << 5 || cam.name.ToLowerInvariant().Contains("ui");
 
         private static Camera FindSourceCamera()
         {
@@ -195,9 +227,11 @@ namespace GWYFVR.Player
 
             CopyRenderer(src, dst);
 
+            // The game's flat UI overlay cameras are left out: their UI is shown on the VR panels
+            // instead, and they would draw a flat HUD over the game window's headset mirror.
             dst.cameraStack.Clear();
             foreach (var overlay in src.cameraStack)
-                if (overlay != null)
+                if (overlay != null && !IsFlatUICamera(overlay))
                     dst.cameraStack.Add(overlay);
 
             UI.WorldSpaceUI.Instance?.AttachOverlayCamera(to);
