@@ -36,7 +36,7 @@ namespace GWYFVR.UI
                 case "interact":
                     // Locked in place (the spawn box) A interacts; items are grabbed with the grip,
                     // everything else is used with the trigger.
-                    if (PlayerLocked())
+                    if (PlayerLocked() || InputEvents.ActiveLayer == InputLayer.Cutscene)
                         return Load("quest_button_a");
                     return Load(InteractTargetIsItem() ? "quest_grip_right" : "quest_trigger_right");
                 case "left click":
@@ -122,6 +122,73 @@ namespace GWYFVR.UI
             image.color = Color.white;
             image.type = Image.Type.Simple;
             image.preserveAspect = true;
+        }
+    }
+
+    /// <summary>
+    /// Hold-to-skip prompts (day summary, game over, credits) are baked into their screens instead of
+    /// going through the key button factory, so they are found and swapped here.
+    /// </summary>
+    internal class SkipPrompts : MonoBehaviour
+    {
+        private readonly HashSet<UnityEngine.Object> done = new HashSet<UnityEngine.Object>();
+        private readonly HashSet<UnityEngine.Object> logged = new HashSet<UnityEngine.Object>();
+        private float nextScan;
+
+        private void Update()
+        {
+            if (Time.unscaledTime < nextScan)
+                return;
+            nextScan = Time.unscaledTime + 0.5f;
+
+            var glyph = VRPrompts.ForKey("middle click"); // A button
+            if (glyph == null)
+                return;
+
+            foreach (var skip in FindObjectsByType<SkipUI>(FindObjectsSortMode.None))
+                Swap(skip.transform, glyph);
+            foreach (var summary in FindObjectsByType<DaySummaryUI>(FindObjectsSortMode.None))
+                if (summary.SkipKeyPrompt != null)
+                    Swap(summary.SkipKeyPrompt.transform, glyph);
+        }
+
+        private void Swap(Transform root, Sprite glyph)
+        {
+            var found = false;
+            foreach (var text in root.GetComponentsInChildren<TMP_Text>(true))
+            {
+                var value = text.text.Trim().Trim('[', ']');
+                if (!string.Equals(value, "E", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                found = true;
+                if (!done.Add(text))
+                    continue;
+                var key = text.transform.parent != null && text.transform.parent.GetComponent<Image>() != null
+                    ? text.transform.parent.gameObject
+                    : text.gameObject;
+                if (key.GetComponent<Image>() == null)
+                    key.AddComponent<Image>();
+                VRPrompts.ShowGlyph(key, glyph);
+                Plugin.Log.LogInfo($"Skip prompt: replaced key text under '{root.name}' with the A button");
+            }
+
+            foreach (var image in root.GetComponentsInChildren<Image>(true))
+            {
+                var name = image.sprite != null ? image.sprite.name.ToLowerInvariant() : "";
+                if (!(name.EndsWith("_e") || name.Contains("_e_") || name == "e" || name.Contains("key_e") || name.Contains("keyboard_e")))
+                    continue;
+                found = true;
+                if (!done.Add(image))
+                    continue;
+                image.sprite = glyph;
+                image.preserveAspect = true;
+                Plugin.Log.LogInfo($"Skip prompt: replaced sprite '{name}' under '{root.name}' with the A button");
+            }
+
+            if (!found && logged.Add(root))
+                foreach (var graphic in root.GetComponentsInChildren<Graphic>(true))
+                    Plugin.Log.LogInfo($"Skip prompt candidate under '{root.name}': {graphic.name} {graphic.GetType().Name} " +
+                                       (graphic is TMP_Text t ? $"text '{t.text}'" : graphic is Image i && i.sprite != null ? $"sprite '{i.sprite.name}'" : ""));
         }
     }
 

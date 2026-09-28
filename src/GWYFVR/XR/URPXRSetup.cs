@@ -57,7 +57,9 @@ namespace GWYFVR.XR
             }
 
             var allocator = (Func<XRPassCreateInfo, XRPass>)Delegate.CreateDelegate(typeof(Func<XRPassCreateInfo, XRPass>), create);
-            XRSystem.Initialize(allocator, occlusion, mirror);
+            // No occlusion mesh: it only saves drawing the hidden corners of each eye, and with the game's
+            // shaders it ended up drawn as a magenta lens-shaped outline standing in the world.
+            XRSystem.Initialize(allocator, null, mirror);
 
             // URP's XR motion vector pass (optional).
             var universalXR = urp.GetType("UnityEngine.Rendering.Universal.XRSystemUniversal");

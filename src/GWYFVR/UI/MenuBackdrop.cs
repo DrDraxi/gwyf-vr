@@ -13,7 +13,7 @@ namespace GWYFVR.UI
     /// </summary>
     public class MenuBackdrop : MonoBehaviour
     {
-        private const string MenuScene = "MainMenuScene";
+        public const string MenuScene = "MainMenuScene";
 
         public static MenuBackdrop Instance { get; private set; }
 

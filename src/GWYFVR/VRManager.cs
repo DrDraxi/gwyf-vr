@@ -41,6 +41,8 @@ namespace GWYFVR
             gameObject.AddComponent<GazeDot>();
             gameObject.AddComponent<EmoteWheelMount>();
             gameObject.AddComponent<VRLogo>();
+            gameObject.AddComponent<ImmersiveScreens>();
+            gameObject.AddComponent<SkipPrompts>();
 
             if (Plugin.Settings.DevCommands.Value)
                 gameObject.AddComponent<DevCommands>();

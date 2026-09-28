@@ -166,6 +166,39 @@ namespace GWYFVR
                             LogTree(root.transform, 0);
                     break;
 
+                case "badshaders":
+                    // Renderers whose shader can't run here (they draw magenta).
+                    foreach (var r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+                        foreach (var m in r.sharedMaterials)
+                            if (m != null && (m.shader == null || !m.shader.isSupported || m.shader.name.Contains("InternalError")))
+                                Plugin.Log.LogInfo($"Bad shader '{(m.shader != null ? m.shader.name : "null")}' on {PathOf(r.transform)} ({r.GetType().Name}) pos {r.transform.position} layer {r.gameObject.layer} material '{m.name}'");
+                    break;
+
+                case "renderers":
+                    // renderers: count active renderers per layer; renderers N: list those on layer N
+                    {
+                        var counts = new System.Collections.Generic.SortedDictionary<int, int>();
+                        foreach (var r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+                        {
+                            if (!r.enabled)
+                                continue;
+                            counts.TryGetValue(r.gameObject.layer, out var n);
+                            counts[r.gameObject.layer] = n + 1;
+                            if (args.Length > 1 && r.gameObject.layer == int.Parse(args[1]))
+                                Plugin.Log.LogInfo($"{PathOf(r.transform)} ({r.GetType().Name}) pos {r.transform.position} material '{(r.sharedMaterial != null ? r.sharedMaterial.name : "")}' shader '{(r.sharedMaterial != null ? r.sharedMaterial.shader.name : "")}'");
+                        }
+                        foreach (var kv in counts)
+                            Plugin.Log.LogInfo($"Layer {kv.Key} '{LayerMask.LayerToName(kv.Key)}': {kv.Value} renderers");
+                        if (VRRig.Instance?.Source != null)
+                            Plugin.Log.LogInfo($"Source mask {VRRig.Instance.Source.cullingMask:X8}, VR mask {VRRig.Instance.VRCamera.cullingMask:X8}");
+                    }
+                    break;
+
+                case "loading":
+                    // loading 1/0: show or hide the game's loading screen
+                    Extensions.MonoSingleton<SceneTransitioner>.Instance?.ForceSet(args.Length > 1 && args[1] == "1");
+                    break;
+
                 case "dump":
                     GWYFVR.Input.VRInput.LogDevices();
                     Plugin.Log.LogInfo(Dump());
@@ -233,7 +266,14 @@ namespace GWYFVR
                 info.Append($" group alpha {group.alpha}");
             var graphic = t.GetComponent<Graphic>();
             if (graphic != null)
-                info.Append($" {graphic.GetType().Name} enabled {graphic.enabled} color {graphic.color}");
+            {
+                info.Append($" {graphic.GetType().Name} enabled {graphic.enabled} color {graphic.color} size {graphic.rectTransform.rect.size}");
+                var material = graphic.material;
+                if (material != null)
+                    info.Append($" material '{material.name}' shader '{material.shader.name}'");
+                if (graphic.mainTexture != null)
+                    info.Append($" texture '{graphic.mainTexture.name}' {graphic.mainTexture.width}x{graphic.mainTexture.height} wrap {graphic.mainTexture.wrapMode}");
+            }
             var canvas = t.GetComponent<Canvas>();
             if (canvas != null)
                 info.Append($" canvas mode {canvas.renderMode} order {canvas.sortingOrder} override {canvas.overrideSorting}");

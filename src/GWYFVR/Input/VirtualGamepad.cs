@@ -11,7 +11,7 @@ namespace GWYFVR.Input
     /// Mapping (game's gamepad binding in brackets):
     ///   left stick = move [left stick], right stick click = jump [south], left stick click = sprint toggle
     ///   [left trigger] (off when you stop moving), right A = ping [right stick press] (climbs out of the
-    ///   spawn box while locked in it [west]), B = crouch [east], left A = emote wheel,
+    ///   spawn box while locked in it, holds to skip screens like game over [west]), B = crouch [east], left A = emote wheel,
     ///   grip on an item = pick it up [west], trigger on a machine/button = interact [west],
     ///   trigger while holding = use item [right shoulder],
     ///   left B / menu = pause [start]. Throwing is physical (see VRThrowing).
@@ -62,6 +62,8 @@ namespace GWYFVR.Input
             var target = interact != null ? interact.TargetInteractable : null;
             var targetIsItem = target is Item;
             var locked = controller != null && controller.IsLocked;
+            // Day summary, game over and credits: hold right A to skip (the game's skip is on the same button).
+            var cutscene = InputEvents.ActiveLayer == InputLayer.Cutscene;
 
             // Grip grabs items, trigger works machines, buttons and slots. Locked in the spawn box, A climbs out.
             // Only a fresh press counts: sweeping an already-held grip or trigger over something does nothing.
@@ -79,7 +81,8 @@ namespace GWYFVR.Input
             var interactPressed = !pointingAtMenu &&
                                   (gripArmed && !holding ||
                                    triggerArmed && target != null && !targetIsItem ||
-                                   locked && r.Primary);
+                                   locked && r.Primary) ||
+                                  cutscene && r.Primary;
 
             // The trigger of the hand holding an item uses the item.
             var useItem = !pointingAtMenu && holding && HandRoles.Holding.Trigger && !(target != null && !targetIsItem);
@@ -111,7 +114,7 @@ namespace GWYFVR.Input
                 .WithButton(GamepadButton.East, r.Secondary)
                 .WithButton(GamepadButton.West, interactPressed)
                 .WithButton(GamepadButton.RightShoulder, useItem)
-                .WithButton(GamepadButton.RightStick, r.Primary && !locked)
+                .WithButton(GamepadButton.RightStick, r.Primary && !locked && !cutscene)
                 .WithButton(GamepadButton.Start, l.Secondary || l.Menu);
 
             InputSystem.QueueStateEvent(pad, state);
