@@ -22,6 +22,11 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Controls: jump on right stick click, sprint toggle on left stick click, ping on right A, emote wheel
   on left A with stick selection.
 - Emote wheel on the left hand, sized to taste.
+- Hand-aimed Quota Gun, Taser, Golden Chip, ping and Hi-Lo slider.
+- Drunk wobble and motion blur off in VR, immunity bloom toned down from 5 to 1.5.
+- Physical bat swing: hand speed turns on the bat's hit area.
+- Full-screen screens (loading, round end, game over) surround you on a sphere; hold right A to skip.
+- No more magenta lens outline at the world origin (XR occlusion mesh off).
 - Game window mirrors the left eye in game; VR logo on the main and pause menus.
 
 ## Done in 0.2.0-alpha
