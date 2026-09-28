@@ -61,8 +61,8 @@ namespace GWYFVR.Input
         private static bool loggedUsages;
 
         /// <summary>
-        /// The controller's pointing pose (OpenXR "aim" pose) when the runtime provides it; otherwise the
-        /// grip pose tilted by the configured laser pitch.
+        /// The controller's pointing pose (OpenXR "aim" pose, or the grip pose tilted down when the runtime
+        /// has none), adjusted by the configured laser rotation.
         /// </summary>
         public static bool TryGetPointerPose(XRNode node, out Vector3 position, out Quaternion rotation)
         {
@@ -80,12 +80,19 @@ namespace GWYFVR.Input
                     Plugin.Log.LogInfo($"Controller features: {string.Join(", ", System.Linq.Enumerable.Select(usages, u => u.name))}");
             }
 
+            var adjust = Plugin.Settings.LaserRotation.Value;
+            if (node == XRNode.LeftHand)
+                adjust = new Vector3(adjust.x, -adjust.y, -adjust.z);
+
             if (device.TryGetFeatureValue(PointerPosition, out position) && device.TryGetFeatureValue(PointerRotation, out rotation))
+            {
+                rotation *= Quaternion.Euler(adjust);
                 return true;
+            }
 
             if (!TryGetAimPose(node, out position, out rotation))
                 return false;
-            rotation *= Quaternion.Euler(Plugin.Settings.LaserPitch.Value, 0f, 0f);
+            rotation *= Quaternion.Euler(35f, 0f, 0f) * Quaternion.Euler(adjust);
             return true;
         }
 
