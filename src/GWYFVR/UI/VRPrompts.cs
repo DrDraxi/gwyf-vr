@@ -48,7 +48,7 @@ namespace GWYFVR.UI
                     return Load("quest_grip_right");
                 case "middle click":
                 case "mmb":
-                    return Load("quest_stick_r_press");
+                    return Load("quest_button_a");
                 case "space":
                     return Load("quest_stick_l_press");
                 case "ctrl":
@@ -57,7 +57,7 @@ namespace GWYFVR.UI
                     return Load("quest_button_b");
                 case "shift":
                 case "left shift":
-                    return Load("quest_button_a");
+                    return Load("quest_stick_r_press");
                 case "r":
                     return Load("quest_button_x");
                 case "esc":
