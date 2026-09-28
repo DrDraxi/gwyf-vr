@@ -112,6 +112,28 @@ namespace GWYFVR
                     VRRig.Instance?.FaceYaw(float.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture));
                     break;
 
+                case "cam":
+                    // cam renderer N | cam pp 0/1 | cam hdr 0/1 | cam msaa 0/1
+                    {
+                        var cmd = args[1].Split(' ');
+                        var vr = VRRig.Instance.VRCamera;
+                        var data = UnityEngine.Rendering.Universal.CameraExtensions.GetUniversalAdditionalCameraData(vr);
+                        var on = cmd.Length > 1 && cmd[1] != "0";
+                        if (cmd[0] == "renderer") data.SetRenderer(int.Parse(cmd[1]));
+                        if (cmd[0] == "pp") data.renderPostProcessing = on;
+                        if (cmd[0] == "hdr") vr.allowHDR = on;
+                        if (cmd[0] == "msaa") vr.allowMSAA = on;
+                        if (cmd[0] == "aa") data.antialiasing = on ? UnityEngine.Rendering.Universal.AntialiasingMode.FastApproximateAntialiasing : UnityEngine.Rendering.Universal.AntialiasingMode.None;
+                        Plugin.Log.LogInfo($"VR camera: renderer {VRRig.RendererIndexOf(data)} pp {data.renderPostProcessing} hdr {vr.allowHDR} msaa {vr.allowMSAA} aa {data.antialiasing} stack {data.cameraStack.Count}");
+                    }
+                    break;
+
+                case "tree":
+                    foreach (var root in FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                        if (root.isRootCanvas && root.name == (args.Length > 1 ? args[1] : ""))
+                            LogTree(root.transform, 0);
+                    break;
+
                 case "dump":
                     GWYFVR.Input.VRInput.LogDevices();
                     Plugin.Log.LogInfo(Dump());
@@ -154,6 +176,28 @@ namespace GWYFVR
 
             displays[0].GetRenderPass(0, out var pass);
             XRSubmitter.CaptureTarget(pass, 0);
+        }
+
+        private static void LogTree(Transform t, int depth)
+        {
+            var info = new StringBuilder();
+            info.Append(new string(' ', depth * 2)).Append(t.name)
+                .Append(t.gameObject.activeSelf ? "" : " [inactive]")
+                .Append($" layer {t.gameObject.layer} pos {t.localPosition} scale {t.localScale}");
+            var group = t.GetComponent<CanvasGroup>();
+            if (group != null)
+                info.Append($" group alpha {group.alpha}");
+            var graphic = t.GetComponent<Graphic>();
+            if (graphic != null)
+                info.Append($" {graphic.GetType().Name} enabled {graphic.enabled} color {graphic.color}");
+            var canvas = t.GetComponent<Canvas>();
+            if (canvas != null)
+                info.Append($" canvas mode {canvas.renderMode} order {canvas.sortingOrder} override {canvas.overrideSorting}");
+            Plugin.Log.LogInfo(info.ToString());
+
+            if (depth < 6)
+                for (var i = 0; i < t.childCount; i++)
+                    LogTree(t.GetChild(i), depth + 1);
         }
 
         private static string Label(Component button)

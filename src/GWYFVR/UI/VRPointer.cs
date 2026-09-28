@@ -46,7 +46,7 @@ namespace GWYFVR.UI
             PointerCamera.nearClipPlane = 0.01f;
             PointerCamera.cullingMask = 0;
 
-            var material = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("UI/Default"));
+            var material = VRMaterials.Unlit(new Color(0.85f, 0.85f, 0.9f));
 
             laser = new GameObject("VRLaser").AddComponent<LineRenderer>();
             laser.transform.SetParent(transform, false);

@@ -19,10 +19,7 @@ namespace GWYFVR.UI
             Destroy(dot.GetComponent<Collider>());
             dot.localScale = Vector3.one * 0.008f;
             var renderer = dot.GetComponent<Renderer>();
-            renderer.sharedMaterial = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("UI/Default"))
-            {
-                color = new Color(1f, 1f, 1f, 0.7f)
-            };
+            renderer.sharedMaterial = VRMaterials.Unlit(Color.white);
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             dot.gameObject.layer = WorldSpaceUI.Layer;
             dot.SetParent(transform, false);

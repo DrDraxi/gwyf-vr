@@ -42,6 +42,8 @@ namespace GWYFVR.UI
 
         private readonly List<Canvas> canvases = new List<Canvas>();
         private readonly HashSet<Canvas> converted = new HashSet<Canvas>();
+        private readonly Dictionary<Canvas, float> drawOrder = new Dictionary<Canvas, float>();
+        private readonly List<Canvas> stacked = new List<Canvas>();
         private Camera overlayCamera;
         private float anchorYaw;
         private bool anchorPlaced;
@@ -158,6 +160,11 @@ namespace GWYFVR.UI
         {
             converted.Add(canvas);
             canvases.Add(canvas);
+            // The order screen space canvases were drawn in, used to stack them the same way in VR.
+            // Overlay canvases are drawn after everything a camera renders, so they always sit on top
+            // of screen-space-camera canvases; among camera canvases, nearer planes are on top.
+            var layer = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? 1_000_000f : -canvas.planeDistance * 100f;
+            drawOrder[canvas] = layer + canvas.sortingOrder + drawOrder.Count * 0.001f;
 
             canvas.renderMode = RenderMode.WorldSpace;
             // Menus are hit-tested from the controller, see VRPointer.
@@ -180,13 +187,18 @@ namespace GWYFVR.UI
         {
             var scale = Plugin.Settings.UIWidth.Value / VirtualScreen.x;
 
+            // Stack canvases like the flat game draws them: by sorting order, then by draw order. Each
+            // later canvas sits a little closer to the viewer so it is drawn on top.
+            stacked.Clear();
             foreach (var canvas in canvases)
-            {
-                if (canvas == null || !canvas.gameObject.activeInHierarchy)
-                    continue;
+                if (canvas != null && canvas.gameObject.activeInHierarchy)
+                    stacked.Add(canvas);
+            stacked.Sort((a, b) => DrawOrder(a).CompareTo(DrawOrder(b)));
 
-                // Nudge higher sorting orders slightly towards the viewer so overlapping canvases don't flicker.
-                var offset = -Anchor.forward * (Mathf.Clamp(canvas.sortingOrder, -100, 200) * 0.0005f);
+            for (var i = 0; i < stacked.Count; i++)
+            {
+                var canvas = stacked[i];
+                var offset = -Anchor.forward * (i * 0.002f);
                 if (VRPointer.Instance != null && canvas.worldCamera != VRPointer.Instance.PointerCamera)
                     canvas.worldCamera = VRPointer.Instance.PointerCamera;
 
@@ -197,6 +209,8 @@ namespace GWYFVR.UI
                 t.localScale = new Vector3(Div(scale, parentScale.x), Div(scale, parentScale.y), Div(scale, parentScale.z));
             }
         }
+
+        private float DrawOrder(Canvas canvas) => drawOrder.TryGetValue(canvas, out var order) ? order : float.MaxValue;
 
         private static float Div(float a, float b) => Mathf.Approximately(b, 0f) ? a : a / b;
 

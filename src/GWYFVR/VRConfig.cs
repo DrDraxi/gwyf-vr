@@ -20,6 +20,7 @@ namespace GWYFVR
         public readonly ConfigEntry<string> OpenXRRuntimeFile;
         public readonly ConfigEntry<StereoMode> RenderMode;
         public readonly ConfigEntry<float> RenderScale;
+        public readonly ConfigEntry<bool> PostProcessing;
 
         public readonly ConfigEntry<TurnMode> Turning;
         public readonly ConfigEntry<float> SnapTurnAngle;
@@ -42,6 +43,9 @@ namespace GWYFVR
                 "MultiPass is the most compatible. SinglePassInstanced is faster but some game shaders may render in one eye only.");
             RenderScale = config.Bind("Rendering", "RenderScale", 1f,
                 new ConfigDescription("Headset render resolution multiplier.", new AcceptableValueRange<float>(0.5f, 2f)));
+
+            PostProcessing = config.Bind("Rendering", "PostProcessing", false,
+                "Use the game's post-processing effects. They currently render black in VR, leave off.");
 
             Turning = config.Bind("Controls", "TurnMode", TurnMode.Snap, "How the right thumbstick turns you.");
             SnapTurnAngle = config.Bind("Controls", "SnapTurnAngle", 45f,

@@ -161,7 +161,8 @@ namespace GWYFVR.Player
             var src = from.GetUniversalAdditionalCameraData();
             var dst = to.GetUniversalAdditionalCameraData();
             dst.renderType = CameraRenderType.Base;
-            dst.renderPostProcessing = src.renderPostProcessing;
+            // The game's post-processing turns the headset image black, off unless enabled in the config.
+            dst.renderPostProcessing = src.renderPostProcessing && Plugin.Settings.PostProcessing.Value;
             dst.antialiasing = src.antialiasing;
             dst.antialiasingQuality = src.antialiasingQuality;
             dst.renderShadows = src.renderShadows;
@@ -182,6 +183,9 @@ namespace GWYFVR.Player
 
             UI.WorldSpaceUI.Instance?.AttachOverlayCamera(to);
         }
+
+        internal static int RendererIndexOf(UniversalAdditionalCameraData data) =>
+            RendererIndexField != null ? (int)RendererIndexField.GetValue(data) : -1;
 
         internal static void CopyRenderer(UniversalAdditionalCameraData from, UniversalAdditionalCameraData to)
         {
