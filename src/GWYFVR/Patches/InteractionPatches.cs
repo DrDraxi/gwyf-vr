@@ -17,7 +17,9 @@ namespace GWYFVR.Patches
         {
             __state = __instance._cam;
             var pointer = VRPointer.Instance;
-            if (Plugin.Settings.HandInteraction.Value && pointer != null && pointer.HandTracked && !pointer.IsPointingAtMenu)
+            // Locked in place (e.g. waking up in the spawn box) the game expects you to look at things.
+            var locked = __instance._pc != null && __instance._pc.IsLocked;
+            if (Plugin.Settings.HandInteraction.Value && pointer != null && pointer.HandTracked && !pointer.IsPointingAtMenu && !locked)
                 __instance._cam = pointer.PointerCamera;
         }
 

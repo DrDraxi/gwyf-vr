@@ -10,9 +10,10 @@ namespace GWYFVR.Input
     ///
     /// Mapping (game's gamepad binding in brackets):
     ///   left stick = move [left stick], left stick click = sprint [left trigger],
-    ///   A = jump [south], B = crouch [east], right grip = interact [west],
-    ///   right trigger = use item [right shoulder], left grip = throw item [right trigger],
-    ///   right stick click = ping [right stick press], left B / menu = pause [start].
+    ///   A = jump [south] (climbs out of the spawn box while locked in it [west]), B = crouch [east],
+    ///   grip on an item = pick it up [west], trigger on a machine/button = interact [west],
+    ///   trigger while holding = use item [right shoulder], right stick click = ping [right stick press],
+    ///   left B / menu = pause [start]. Throwing is physical (see VRThrowing).
     /// The right stick is not forwarded: it turns the VR rig instead of aiming.
     /// </summary>
     public class VirtualGamepad : MonoBehaviour
@@ -41,21 +42,39 @@ namespace GWYFVR.Input
                 Plugin.Log.LogInfo("Added virtual gamepad for the VR controllers");
             }
 
+            HandRoles.Update();
+            var active = HandRoles.Active;
+            var holding = HandRoles.IsHoldingItem;
+
+            // While a menu is pointed at, the trigger clicks the menu instead of doing anything in game.
+            var pointingAtMenu = UI.VRPointer.Instance != null && UI.VRPointer.Instance.IsPointingAtMenu;
+
+            var controller = Player.LocalPlayer.Controller;
+            var interact = controller != null ? controller.GetComponent<PlayerInteract>() : null;
+            var target = interact != null ? interact.TargetInteractable : null;
+            var targetIsItem = target is Item;
+            var locked = controller != null && controller.IsLocked;
+
+            // Grip grabs items, trigger works machines, buttons and slots. Locked in the spawn box, A climbs out.
+            var interactPressed = !pointingAtMenu &&
+                                  (!holding && targetIsItem && active.Grip ||
+                                   target != null && !targetIsItem && active.Trigger ||
+                                   locked && r.Primary);
+
+            // The trigger of the hand holding an item uses the item.
+            var useItem = !pointingAtMenu && holding && HandRoles.Holding.Trigger && !(target != null && !targetIsItem);
+
             var state = new GamepadState
             {
                 leftStick = l.Stick,
                 leftTrigger = l.StickClick ? 1f : 0f,
-                rightTrigger = l.Grip ? 1f : 0f,
             };
 
-            // While a menu is being pointed at, the trigger clicks the menu instead of using the item.
-            var pointingAtMenu = UI.VRPointer.Instance != null && UI.VRPointer.Instance.IsPointingAtMenu;
-
             state = state
-                .WithButton(GamepadButton.South, r.Primary)
+                .WithButton(GamepadButton.South, r.Primary && !locked)
                 .WithButton(GamepadButton.East, r.Secondary)
-                .WithButton(GamepadButton.West, r.Grip)
-                .WithButton(GamepadButton.RightShoulder, r.Trigger && !pointingAtMenu)
+                .WithButton(GamepadButton.West, interactPressed)
+                .WithButton(GamepadButton.RightShoulder, useItem)
                 .WithButton(GamepadButton.RightStick, r.StickClick)
                 .WithButton(GamepadButton.Start, l.Secondary || l.Menu);
 

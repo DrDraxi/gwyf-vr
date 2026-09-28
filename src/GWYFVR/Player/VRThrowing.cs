@@ -7,9 +7,9 @@ using XRCommonUsages = UnityEngine.XR.CommonUsages;
 namespace GWYFVR.Player
 {
     /// <summary>
-    /// Physical throwing: while holding an item, keep the right grip held; swing your arm and let go of
+    /// Physical throwing: while holding an item, keep that hand's grip held; swing your arm and let go of
     /// the grip to throw the item with your hand's speed and direction. Replaces the game's
-    /// "hold a button to charge, release to throw" (which still works on the left grip).
+    /// "hold a button to charge, release to throw".
     /// </summary>
     public class VRThrowing : MonoBehaviour
     {
@@ -37,8 +37,8 @@ namespace GWYFVR.Player
 
             SampleHandVelocity(rig.transform);
 
-            XRControllers.Poll();
-            var grip = XRControllers.Right.Grip;
+            HandRoles.Update();
+            var grip = HandRoles.Holding.Grip;
             var holding = inventory.NetworkholdingItem != null && !inventory._localAlreadyThrown;
 
             if (grip && !gripWasHeld)
@@ -54,7 +54,7 @@ namespace GWYFVR.Player
 
         private void SampleHandVelocity(Transform origin)
         {
-            var device = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+            var device = InputDevices.GetDeviceAtXRNode(HandRoles.HoldingHand);
             if (!device.isValid || !device.TryGetFeatureValue(XRCommonUsages.deviceVelocity, out var velocity))
                 return;
 
@@ -96,7 +96,7 @@ namespace GWYFVR.Player
             var torque = Mathf.Lerp(settings.minItemThrowTorque, settings.maxItemThrowTorque, Mathf.Clamp01(speed / 10f));
 
             // Launch from the hand rather than in front of the face (applies when we are the host).
-            var hand = VRHands.Instance != null ? VRHands.Instance.RightHandPosition : (Vector3?)null;
+            var hand = VRHands.Instance != null ? VRHands.Instance.HoldingHandPosition : (Vector3?)null;
             if (hand.HasValue && inventory.throwPosition != null)
                 inventory.throwPosition.position = hand.Value;
 

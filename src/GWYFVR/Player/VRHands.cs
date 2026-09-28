@@ -39,8 +39,15 @@ namespace GWYFVR.Player
 
         public bool Active { get; private set; }
 
-        /// <summary>World position of the right hand, while the hands are active.</summary>
-        public Vector3? RightHandPosition => Active && rightBone != null ? rightBone.position : (Vector3?)null;
+        /// <summary>World position of the hand holding the item, while the hands are active.</summary>
+        public Vector3? HoldingHandPosition
+        {
+            get
+            {
+                var bone = HandRoles.HoldingLeft ? leftBone : rightBone;
+                return Active && bone != null ? bone.position : (Vector3?)null;
+            }
+        }
 
         private PlayerHead boundHead;
         private Transform leftBone;
@@ -48,9 +55,9 @@ namespace GWYFVR.Player
         private Transform itemHolder;
         private Transform throwPosition;
         private PlayerInventory inventory;
-        private readonly System.Collections.Generic.List<(Transform bone, Quaternion open)> leftFingers =
+        private readonly System.Collections.Generic.List<(Transform bone, Quaternion open)> openFingers =
             new System.Collections.Generic.List<(Transform, Quaternion)>();
-        private bool leftFingersCaptured;
+        private bool fingersCaptured;
 
         private void Awake()
         {
@@ -70,8 +77,8 @@ namespace GWYFVR.Player
             boundHead = LocalPlayer.Head;
             leftBone = rightBone = itemHolder = throwPosition = null;
             inventory = null;
-            leftFingers.Clear();
-            leftFingersCaptured = false;
+            openFingers.Clear();
+            fingersCaptured = false;
             if (boundHead == null)
                 return;
 
@@ -107,46 +114,56 @@ namespace GWYFVR.Player
             var leftTracked = PlaceHand(leftBone, rig.transform, XRNode.LeftHand, true);
             var rightTracked = PlaceHand(rightBone, rig.transform, XRNode.RightHand, false);
 
-            if (itemHolder != null && rightTracked &&
-                XRControllers.TryGetAimPose(XRNode.RightHand, out var position, out var rotation))
+            // The held item and its launch point follow the hand that picked it up.
+            var holdingLeft = HandRoles.HoldingLeft;
+            var holdingNode = holdingLeft ? XRNode.LeftHand : XRNode.RightHand;
+            var holdingBone = holdingLeft ? leftBone : rightBone;
+            var holdingTracked = holdingLeft ? leftTracked : rightTracked;
+
+            if (itemHolder != null && holdingTracked &&
+                XRControllers.TryGetAimPose(holdingNode, out var position, out var rotation))
             {
                 var worldRotation = rig.transform.rotation * rotation;
+                var offset = holdingLeft ? new Vector3(-ItemOffset.x, ItemOffset.y, ItemOffset.z) : ItemOffset;
                 itemHolder.SetPositionAndRotation(
-                    rig.transform.TransformPoint(position) + worldRotation * ItemOffset,
+                    rig.transform.TransformPoint(position) + worldRotation * offset,
                     worldRotation * Quaternion.Euler(90f, 0f, 0f));
             }
 
-            // Items launch from the throw position: keep it on the right hand so throws leave the hand.
-            if (throwPosition != null && rightTracked)
-                throwPosition.SetPositionAndRotation(rightBone.position, itemHolder != null ? itemHolder.rotation : rightBone.rotation);
+            // Items launch from the throw position: keep it on the holding hand so throws leave the hand.
+            if (throwPosition != null && holdingTracked)
+                throwPosition.SetPositionAndRotation(holdingBone.position, itemHolder != null ? itemHolder.rotation : holdingBone.rotation);
 
-            KeepLeftHandOpen();
+            KeepFreeHandOpen();
 
             Active = leftTracked || rightTracked;
         }
 
         /// <summary>
-        /// The game animates both hands gripping a held item. Items are held in the right hand only in VR,
-        /// so while holding one, put the left hand's fingers back into their empty-handed pose.
+        /// The game animates both hands gripping a held item. In VR one hand holds it, so while holding,
+        /// put the other hand's fingers back into their empty-handed pose.
         /// </summary>
-        private void KeepLeftHandOpen()
+        private void KeepFreeHandOpen()
         {
             var holding = inventory != null && inventory.NetworkholdingItem != null;
             if (!holding)
             {
-                // Remember what the fingers look like when the hands are empty.
-                leftFingers.Clear();
-                foreach (var bone in leftBone.GetComponentsInChildren<Transform>())
-                    if (bone != leftBone)
-                        leftFingers.Add((bone, bone.localRotation));
-                leftFingersCaptured = true;
+                // Remember what both hands' fingers look like when empty.
+                openFingers.Clear();
+                foreach (var hand in new[] { leftBone, rightBone })
+                    foreach (var bone in hand.GetComponentsInChildren<Transform>())
+                        if (bone != hand)
+                            openFingers.Add((bone, bone.localRotation));
+                fingersCaptured = true;
                 return;
             }
 
-            if (!leftFingersCaptured)
+            if (!fingersCaptured)
                 return;
-            foreach (var (bone, open) in leftFingers)
-                if (bone != null)
+
+            var freeHand = HandRoles.HoldingLeft ? rightBone : leftBone;
+            foreach (var (bone, open) in openFingers)
+                if (bone != null && bone.IsChildOf(freeHand))
                     bone.localRotation = open;
         }
 

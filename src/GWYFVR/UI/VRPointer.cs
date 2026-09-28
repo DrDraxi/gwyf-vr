@@ -96,7 +96,8 @@ namespace GWYFVR.UI
         private void Update()
         {
             XRControllers.Poll();
-            var controller = LeftHanded ? XRControllers.Left : XRControllers.Right;
+            HandRoles.Update();
+            var controller = HandRoles.Active;
 
             // Created lazily: the Input System isn't ready yet while plugins load.
             if (mouse == null)
@@ -139,7 +140,7 @@ namespace GWYFVR.UI
             IsPointingAtMenu = false;
             HandTracked = false;
 
-            if (origin == null || !XRControllers.TryGetPointerPose(LeftHanded ? XRNode.LeftHand : XRNode.RightHand, out var aimPos, out var aimRot))
+            if (origin == null || !XRControllers.TryGetPointerPose(HandRoles.ActiveHand, out var aimPos, out var aimRot))
             {
                 laser.enabled = false;
                 hitDot.gameObject.SetActive(false);
@@ -153,8 +154,8 @@ namespace GWYFVR.UI
             var hit = Vector3.zero;
             IsPointingAtMenu = ui != null && ui.Raycast(ray, out hit);
 
-            // In game, show a short laser for aiming interactions with the hand.
-            var inGame = !IsPointingAtMenu && rig.PlayerMode && Plugin.Settings.HandInteraction.Value;
+            // In game, show the laser only while it points at something you can interact with.
+            var inGame = !IsPointingAtMenu && rig.PlayerMode && Plugin.Settings.HandInteraction.Value && HasInteractTarget();
             if (inGame)
                 hit = Physics.Raycast(ray, out var worldHit, 3f, ~(1 << WorldSpaceUI.Layer), QueryTriggerInteraction.Ignore)
                     ? worldHit.point
@@ -168,6 +169,13 @@ namespace GWYFVR.UI
             laser.SetPosition(0, ray.origin);
             laser.SetPosition(1, hit);
             hitDot.position = hit;
+        }
+
+        private static bool HasInteractTarget()
+        {
+            var controller = LocalPlayer.Controller;
+            var interact = controller != null ? controller.GetComponent<PlayerInteract>() : null;
+            return interact != null && interact.TargetInteractable != null;
         }
 
         private static bool Place(Transform hand, Transform origin, XRNode node)
