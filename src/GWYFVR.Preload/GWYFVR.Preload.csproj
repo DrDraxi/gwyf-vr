@@ -4,12 +4,14 @@
     <AssemblyName>GWYFVR.Preload</AssemblyName>
     <RootNamespace>GWYFVR.Preload</RootNamespace>
     <DebugType>embedded</DebugType>
+    <!-- BepInEx 5 ships Mono.Cecil 0.10.4; compile against that, not the newer one HarmonyX asks for. -->
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
   </PropertyGroup>
 
+  <!-- From NuGet, so it builds without BepInEx installed in the game folder; BepInEx ships both at runtime. -->
   <ItemGroup>
-    <Reference Include="$(GameDir)\BepInEx\core\BepInEx.dll;$(GameDir)\BepInEx\core\Mono.Cecil.dll">
-      <Private>false</Private>
-    </Reference>
+    <PackageReference Include="BepInEx.Core" Version="5.4.*" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Mono.Cecil" Version="0.10.4" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 
 </Project>

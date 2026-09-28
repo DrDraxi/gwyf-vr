@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.3 (alpha)
+
+- The source code is public: https://github.com/DrDraxi/gwyf-vr
+
 ## 0.3.2 (alpha)
 
 - New icon and an updated readme.
