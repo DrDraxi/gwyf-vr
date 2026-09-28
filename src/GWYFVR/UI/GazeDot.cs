@@ -11,6 +11,8 @@ namespace GWYFVR.UI
     {
         private const float Distance = 2f;
         private Transform dot;
+        private BaseCursor[] cursors = new BaseCursor[0];
+        private float nextCursorScan;
 
         private void Awake()
         {
@@ -27,6 +29,8 @@ namespace GWYFVR.UI
 
         private void LateUpdate()
         {
+            HideGameCursors();
+
             var rig = VRRig.Instance;
             var show = rig != null && rig.PlayerMode && GameCrosshairVisible();
             dot.gameObject.SetActive(show);
@@ -35,6 +39,23 @@ namespace GWYFVR.UI
 
             var head = rig.VRCamera.transform;
             dot.position = head.position + head.forward * Distance;
+        }
+
+        /// <summary>
+        /// The game's mouse cursor sprite sits at the centre of the view (the virtual mouse is centred)
+        /// and renders as a magenta square in VR. The laser does its job, so keep it hidden.
+        /// </summary>
+        private void HideGameCursors()
+        {
+            if (Time.unscaledTime >= nextCursorScan)
+            {
+                nextCursorScan = Time.unscaledTime + 1f;
+                cursors = Object.FindObjectsByType<BaseCursor>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            }
+
+            foreach (var cursor in cursors)
+                if (cursor != null && cursor.uiCursorImage != null && cursor.uiCursorImage.enabled)
+                    cursor.uiCursorImage.enabled = false;
         }
 
         /// <summary>Checks whether the game wants its crosshair shown, and keeps the flat one invisible.</summary>
