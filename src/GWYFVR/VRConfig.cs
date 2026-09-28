@@ -30,6 +30,8 @@ namespace GWYFVR
         public readonly ConfigEntry<bool> LeftHandedPointer;
         public readonly ConfigEntry<float> LaserPitch;
         public readonly ConfigEntry<bool> HandInteraction;
+        public readonly ConfigEntry<bool> PhysicalThrowing;
+        public readonly ConfigEntry<float> ThrowStrength;
 
         public readonly ConfigEntry<Vector3> HandRotation;
         public readonly ConfigEntry<Vector3> HandPosition;
@@ -67,6 +69,10 @@ namespace GWYFVR
                 new ConfigDescription("Degrees the laser points down from the controller grip, used when the runtime gives no pointer pose.", new AcceptableValueRange<float>(-90f, 90f)));
             HandInteraction = config.Bind("Controls", "HandInteraction", true,
                 "Aim interaction (picking up, pressing buttons) with the right controller instead of your head.");
+            PhysicalThrowing = config.Bind("Controls", "PhysicalThrowing", true,
+                "Hold the right grip to keep holding an item; swing and let go to throw it.");
+            ThrowStrength = config.Bind("Controls", "ThrowStrength", 1.5f,
+                new ConfigDescription("Multiplier from your hand speed to the item's throw speed.", new AcceptableValueRange<float>(0.5f, 5f)));
             LeftHandedPointer = config.Bind("Controls", "LeftHandedPointer", false,
                 "Use the left controller as the menu pointer.");
 

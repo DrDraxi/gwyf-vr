@@ -39,6 +39,9 @@ namespace GWYFVR.Player
 
         public bool Active { get; private set; }
 
+        /// <summary>World position of the right hand, while the hands are active.</summary>
+        public Vector3? RightHandPosition => Active && rightBone != null ? rightBone.position : (Vector3?)null;
+
         private PlayerHead boundHead;
         private Transform leftBone;
         private Transform rightBone;
