@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using UnityEngine;
 
 namespace GWYFVR
 {
@@ -27,6 +28,10 @@ namespace GWYFVR
         public readonly ConfigEntry<float> SnapTurnAngle;
         public readonly ConfigEntry<float> SmoothTurnSpeed;
         public readonly ConfigEntry<bool> LeftHandedPointer;
+
+        public readonly ConfigEntry<Vector3> HandRotation;
+        public readonly ConfigEntry<Vector3> HandPosition;
+        public readonly ConfigEntry<Vector3> ItemOffset;
 
         public readonly ConfigEntry<float> UIDistance;
         public readonly ConfigEntry<float> UIWidth;
@@ -58,6 +63,13 @@ namespace GWYFVR
                 new ConfigDescription("Degrees per second for smooth turning.", new AcceptableValueRange<float>(30f, 360f)));
             LeftHandedPointer = config.Bind("Controls", "LeftHandedPointer", false,
                 "Use the left controller as the menu pointer.");
+
+            HandRotation = config.Bind("Hands", "Rotation", new Vector3(-30f, 90f, 180f),
+                "Rotation from the right controller to the right hand, in degrees (mirrored for the left hand). Tune in game with F8.");
+            HandPosition = config.Bind("Hands", "Position", new Vector3(0f, 0f, -0.08f),
+                "Offset from the right controller to the right hand, in meters (mirrored for the left hand).");
+            ItemOffset = config.Bind("Hands", "ItemOffset", new Vector3(0f, 0f, 0.12f),
+                "Offset from the right controller to held items, in meters.");
 
             UIDistance = config.Bind("UI", "Distance", 1.6f,
                 new ConfigDescription("How far in front of you menus and the HUD float, in meters.", new AcceptableValueRange<float>(0.5f, 5f)));

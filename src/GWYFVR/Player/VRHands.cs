@@ -17,13 +17,25 @@ namespace GWYFVR.Player
         public static VRHands Instance { get; private set; }
 
         /// <summary>Rotation from the controller grip pose to a hand bone (fingers are the bone's +Y).</summary>
-        public static Vector3 RotationOffset = new Vector3(90f, 0f, 0f);
+        public static Vector3 RotationOffset
+        {
+            get => Plugin.Settings.HandRotation.Value;
+            set => Plugin.Settings.HandRotation.Value = value;
+        }
 
         /// <summary>Hand bone position relative to the controller grip, in the controller's space (meters).</summary>
-        public static Vector3 PositionOffset = new Vector3(0f, 0f, -0.08f);
+        public static Vector3 PositionOffset
+        {
+            get => Plugin.Settings.HandPosition.Value;
+            set => Plugin.Settings.HandPosition.Value = value;
+        }
 
         /// <summary>Held item position relative to the right controller.</summary>
-        public static Vector3 ItemOffset = new Vector3(0f, 0f, 0.12f);
+        public static Vector3 ItemOffset
+        {
+            get => Plugin.Settings.ItemOffset.Value;
+            set => Plugin.Settings.ItemOffset.Value = value;
+        }
 
         public bool Active { get; private set; }
 
