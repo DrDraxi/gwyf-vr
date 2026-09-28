@@ -8,7 +8,7 @@ namespace GWYFVR.Patches
 {
     /// <summary>
     /// Screen effects that are fine on a monitor but make people sick in a headset. They only show when
-    /// post-processing is on in VR, but are switched off either way.
+    /// post-processing is on in VR.
     /// </summary>
     [HarmonyPatch]
     internal static class ComfortEffectPatches
@@ -17,8 +17,8 @@ namespace GWYFVR.Patches
         private const float ImmunityBloom = 1.5f;
 
         /// <summary>
-        /// Lens distortion (the drunk "Tipsy Fortune" wobble and feedback effects), motion blur and panini
-        /// projection warp or smear the whole view, so every volume has them turned off.
+        /// Motion blur and panini projection smear or warp the whole view, so every volume has them turned
+        /// off. Lens distortion (the drunk wobble and feedback effects) too, unless the drunk effect is on.
         /// </summary>
         [HarmonyPatch(typeof(Volume), "OnEnable")]
         [HarmonyPostfix]
@@ -27,7 +27,7 @@ namespace GWYFVR.Patches
             var profile = __instance.HasInstantiatedProfile() ? __instance.profile : __instance.sharedProfile;
             if (profile == null)
                 return;
-            if (profile.TryGet<LensDistortion>(out var lens))
+            if (!Plugin.Settings.DrunkEffect.Value && profile.TryGet<LensDistortion>(out var lens))
                 lens.active = false;
             if (profile.TryGet<MotionBlur>(out var blur))
                 blur.active = false;
@@ -35,11 +35,22 @@ namespace GWYFVR.Patches
                 panini.active = false;
         }
 
-        /// <summary>The drunk buff keeps its sound but not the endless wobble of the whole view.</summary>
+        /// <summary>
+        /// The drunk buff wobbles the view with lens distortion. With the "Drunk screen wobble" setting off
+        /// it keeps its sound but not the wobble. The setting applies the next time you get drunk.
+        /// </summary>
         [HarmonyPatch(typeof(PlayerBuffUI), nameof(PlayerBuffUI.StartPingPong))]
         [HarmonyPrefix]
-        private static bool NoDrunkWobble(PlayerBuffUI __instance)
+        private static bool DrunkWobble(PlayerBuffUI __instance)
         {
+            var lens = __instance._lensDistortion;
+            if (Plugin.Settings.DrunkEffect.Value)
+            {
+                if (lens != null)
+                    lens.active = true;
+                return true;
+            }
+
             if (__instance.drunkVolume != null)
                 __instance.drunkVolume.weight = 0f;
             return false;

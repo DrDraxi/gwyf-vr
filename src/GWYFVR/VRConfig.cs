@@ -37,6 +37,8 @@ namespace GWYFVR
         public readonly ConfigEntry<bool> RoomScale;
         public readonly ConfigEntry<bool> PhysicalThrowing;
         public readonly ConfigEntry<float> ThrowStrength;
+        public readonly ConfigEntry<bool> ProximityGrab;
+        public readonly ConfigEntry<bool> DrunkEffect;
 
         public readonly ConfigEntry<Vector3> HandRotation;
         public readonly ConfigEntry<Vector3> HandPosition;
@@ -96,6 +98,10 @@ namespace GWYFVR
                 new ConfigDescription("Multiplier from your hand speed to the item's throw speed.", new AcceptableValueRange<float>(0.5f, 5f)));
             LeftHandedPointer = config.Bind("Controls", "LeftHandedPointer", false,
                 "Use the left controller as the menu pointer.");
+            ProximityGrab = config.Bind("Controls", "ProximityGrab", true,
+                "Grab items your hand is touching with the grip; the laser picks things out of reach.");
+            DrunkEffect = config.Bind("Rendering", "DrunkEffect", true,
+                "Keep the game's wobbling drunk screen effect (Tipsy Fortune) in VR. Turn off if it makes you queasy. Needs PostProcessing.");
 
             HandRotation = config.Bind("Hands", "Rotation", new Vector3(10f, 95f, 138f),
                 "Rotation from the right controller to the right hand, in degrees (mirrored for the left hand). Tune in game with F8.");

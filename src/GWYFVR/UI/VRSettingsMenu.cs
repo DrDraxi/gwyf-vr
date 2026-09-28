@@ -67,6 +67,7 @@ namespace GWYFVR.UI
             Add(Toggle("throwing", "Physical throwing", s.PhysicalThrowing), e => s.PhysicalThrowing.Value = ((ToggleSettingItem)e).value);
             Add(Slider("throwstrength", "Throw strength", 0.5f, 5f, false, s.ThrowStrength), e => s.ThrowStrength.Value = ((SliderSettingItem)e).value);
             Add(Toggle("handaim", "Aim with your hand", s.HandInteraction), e => s.HandInteraction.Value = ((ToggleSettingItem)e).value);
+            Add(Toggle("proximitygrab", "Grab by touch", s.ProximityGrab), e => s.ProximityGrab.Value = ((ToggleSettingItem)e).value);
             Add(Toggle("lefthanded", "Left handed menu pointer", s.LeftHandedPointer), e => s.LeftHandedPointer.Value = ((ToggleSettingItem)e).value);
 
             Add(Title("VR display"));
@@ -75,6 +76,7 @@ namespace GWYFVR.UI
             Add(Slider("huddistance", "HUD distance", 0.5f, 3f, false, s.HudDistance), e => s.HudDistance.Value = ((SliderSettingItem)e).value);
             Add(Slider("hudwidth", "HUD size", 0.5f, 3f, false, s.HudWidth), e => s.HudWidth.Value = ((SliderSettingItem)e).value);
             Add(Slider("menudistance", "Menu distance", 0.5f, 5f, false, s.UIDistance), e => s.UIDistance.Value = ((SliderSettingItem)e).value);
+            Add(Toggle("drunkeffect", "Drunk screen wobble", s.DrunkEffect), e => s.DrunkEffect.Value = ((ToggleSettingItem)e).value);
             Add(Toggle("skipsplash", "Skip the start-up coin flip", s.SkipSplash), e => s.SkipSplash.Value = ((ToggleSettingItem)e).value);
         }
 
