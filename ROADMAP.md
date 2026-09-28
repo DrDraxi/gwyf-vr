@@ -10,11 +10,12 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Post-processing in VR: rebuild the XR-enabled render pipeline with the exact game Unity version
   (6000.3.6f1); the 6000.3.7 build is missing a pass in the game's UberPost shader.
 
-- Cutscenes and the win scene move the view on their own (Cinemachine); show them on a big virtual screen.
 - Ragdoll, knockback, being carried and the spawn-box launch: add a comfort fade or vignette.
 - Number boxes (custom lobby, settings) need a VR keypad; zoom and pocket slots need VR buttons.
 - Still to test in the headset: hand-aimed Quota Gun/Taser/Golden Chip/Hi-Lo, bet slider, drunk toggle.
 - Release 0.3.0 on Thunderstore (only with the go-ahead).
+- Hand sync between modded players (optional, mod-only layer; cross-play test first).
+- Cutscene camera (Cinemachine) moves the view: leave until it looks wrong in the headset.
 - Optional: a smoothed flat spectator camera for the game window instead of the raw eye view.
 - Grip/trigger fresh-press detection is per active hand; pressing the other hand while one is held can be missed.
 
