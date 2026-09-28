@@ -138,6 +138,8 @@ namespace GWYFVR.Player
             CopyCameraSettings(source, VRCamera);
             VRCamera.enabled = true;
             source.enabled = false;
+            // The game sometimes renders its cameras by hand; never let those be stereo renders.
+            source.stereoTargetEye = StereoTargetEyeMask.None;
 
             if (LocalPlayer.Head != null && source == LocalPlayer.Camera)
                 FaceYaw(LocalPlayer.Head.transform.eulerAngles.y);
