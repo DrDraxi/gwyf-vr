@@ -19,6 +19,10 @@ namespace GWYFVR.Input
     public class VirtualGamepad : MonoBehaviour
     {
         private Gamepad pad;
+        private bool gripArmed;
+        private bool triggerArmed;
+        private bool lastActiveGrip;
+        private bool lastActiveTrigger;
 
 
         private void OnDestroy()
@@ -56,9 +60,21 @@ namespace GWYFVR.Input
             var locked = controller != null && controller.IsLocked;
 
             // Grip grabs items, trigger works machines, buttons and slots. Locked in the spawn box, A climbs out.
+            // Only a fresh press counts: sweeping an already-held grip or trigger over something does nothing.
+            if (active.Grip && !lastActiveGrip)
+                gripArmed = !pointingAtMenu && !holding && targetIsItem;
+            if (!active.Grip)
+                gripArmed = false;
+            if (active.Trigger && !lastActiveTrigger)
+                triggerArmed = !pointingAtMenu && target != null && !targetIsItem;
+            if (!active.Trigger)
+                triggerArmed = false;
+            lastActiveGrip = active.Grip;
+            lastActiveTrigger = active.Trigger;
+
             var interactPressed = !pointingAtMenu &&
-                                  (!holding && targetIsItem && active.Grip ||
-                                   target != null && !targetIsItem && active.Trigger ||
+                                  (gripArmed && !holding ||
+                                   triggerArmed && target != null && !targetIsItem ||
                                    locked && r.Primary);
 
             // The trigger of the hand holding an item uses the item.
