@@ -37,6 +37,12 @@ namespace GWYFVR.Patches
             return false;
         }
 
+        private static bool IsOwnBody(Item item)
+        {
+            var controller = LocalPlayer.Controller;
+            return controller != null && item.transform.root == controller.transform.root;
+        }
+
         private static void Nearest(Transform rig, XRNode hand, LayerMask layers, ref Item best, ref float bestDistance)
         {
             if (!XRControllers.TryGetAimPose(hand, out var position, out _))
@@ -49,6 +55,10 @@ namespace GWYFVR.Patches
                 var collider = Hits[i];
                 var item = collider.GetComponentInParent<Item>();
                 if (item == null || item.NetworkHolder != null || item.isInPocket)
+                    continue;
+                // Your own body is an item too (PlayerCarry, for being carried) and always within reach
+                // of your hands: targeting it blocked every other interaction and grabbed yourself.
+                if (IsOwnBody(item))
                     continue;
 
                 var distance = Vector3.Distance(point, collider.bounds.ClosestPoint(point));
