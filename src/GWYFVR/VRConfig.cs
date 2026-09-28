@@ -37,6 +37,8 @@ namespace GWYFVR
         public readonly ConfigEntry<Vector3> HandRotation;
         public readonly ConfigEntry<Vector3> HandPosition;
         public readonly ConfigEntry<Vector3> ItemOffset;
+        public readonly ConfigEntry<float> HandScale;
+        public readonly ConfigEntry<float> HeldItemScale;
 
         public readonly ConfigEntry<float> UIDistance;
         public readonly ConfigEntry<float> UIWidth;
@@ -85,6 +87,11 @@ namespace GWYFVR
                 "Offset from the right controller to the right hand, in meters (mirrored for the left hand).");
             ItemOffset = config.Bind("Hands", "ItemOffset", new Vector3(0.01f, 0f, 0.12f),
                 "Offset from the right controller to held items, in meters.");
+
+            HandScale = config.Bind("Hands", "Scale", 0.5f,
+                new ConfigDescription("Size of the hands compared to the flat game.", new AcceptableValueRange<float>(0.2f, 1.5f)));
+            HeldItemScale = config.Bind("Hands", "HeldItemScale", 0.5f,
+                new ConfigDescription("Size of held items compared to the flat game (only while held).", new AcceptableValueRange<float>(0.2f, 1.5f)));
 
             UIDistance = config.Bind("UI", "Distance", 1.6f,
                 new ConfigDescription("How far in front of you menus and the HUD float, in meters.", new AcceptableValueRange<float>(0.5f, 5f)));

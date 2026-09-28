@@ -15,7 +15,7 @@ namespace GWYFVR.UI
         private bool visible;
 
         private void Awake() => instance = this;
-        private Rect window = new Rect(20, 20, 420, 520);
+        private Rect window = new Rect(20, 20, 420, 580);
 
         private void Update()
         {
@@ -48,6 +48,10 @@ namespace GWYFVR.UI
             VRHands.ItemOffset = Vector3Sliders("Item offset (m)", VRHands.ItemOffset, -0.3f, 0.3f, 0.005f);
 
             Plugin.Settings.LaserRotation.Value = Vector3Sliders("Laser rotation (pitch, yaw, roll)", Plugin.Settings.LaserRotation.Value, -90f, 90f, 1f);
+
+            GUILayout.Label($"Hand scale: {Plugin.Settings.HandScale.Value:0.00}   Held item scale: {Plugin.Settings.HeldItemScale.Value:0.00}");
+            Plugin.Settings.HandScale.Value = Mathf.Round(GUILayout.HorizontalSlider(Plugin.Settings.HandScale.Value, 0.2f, 1.5f) * 20f) / 20f;
+            Plugin.Settings.HeldItemScale.Value = Mathf.Round(GUILayout.HorizontalSlider(Plugin.Settings.HeldItemScale.Value, 0.2f, 1.5f) * 20f) / 20f;
 
             if (GUILayout.Button("Reset to defaults"))
             {

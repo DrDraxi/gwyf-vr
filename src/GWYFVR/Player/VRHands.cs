@@ -58,6 +58,8 @@ namespace GWYFVR.Player
         private readonly System.Collections.Generic.List<(Transform bone, Quaternion open)> openFingers =
             new System.Collections.Generic.List<(Transform, Quaternion)>();
         private bool fingersCaptured;
+        private Item scaledItem;
+        private Vector3 scaledItemOriginalScale;
 
         private void Awake()
         {
@@ -135,6 +137,7 @@ namespace GWYFVR.Player
                 throwPosition.SetPositionAndRotation(holdingBone.position, itemHolder != null ? itemHolder.rotation : holdingBone.rotation);
 
             KeepFreeHandOpen();
+            ScaleHeldItem();
 
             Active = leftTracked || rightTracked;
         }
@@ -167,6 +170,28 @@ namespace GWYFVR.Player
                     bone.localRotation = open;
         }
 
+        /// <summary>Shrink the item model while it is held; restore it as soon as it isn't.</summary>
+        private void ScaleHeldItem()
+        {
+            var held = inventory != null ? inventory.NetworkholdingItem : null;
+            if (held == scaledItem)
+            {
+                if (held != null && held.modelTransform != null)
+                    held.modelTransform.localScale = scaledItemOriginalScale * Plugin.Settings.HeldItemScale.Value;
+                return;
+            }
+
+            if (scaledItem != null && scaledItem.modelTransform != null)
+                scaledItem.modelTransform.localScale = scaledItemOriginalScale;
+
+            scaledItem = held;
+            if (held != null && held.modelTransform != null)
+            {
+                scaledItemOriginalScale = held.modelTransform.localScale;
+                held.modelTransform.localScale = scaledItemOriginalScale * Plugin.Settings.HeldItemScale.Value;
+            }
+        }
+
         private static bool PlaceHand(Transform bone, Transform origin, XRNode node, bool left)
         {
             if (!XRControllers.TryGetAimPose(node, out var position, out var rotation))
@@ -179,6 +204,7 @@ namespace GWYFVR.Player
             bone.SetPositionAndRotation(
                 origin.TransformPoint(position) + worldRotation * offset,
                 worldRotation * Quaternion.Euler(euler));
+            bone.localScale = Vector3.one * Plugin.Settings.HandScale.Value;
             return true;
         }
     }
