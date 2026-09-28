@@ -46,6 +46,11 @@ namespace GWYFVR.Player
         private Transform leftBone;
         private Transform rightBone;
         private Transform itemHolder;
+        private Transform throwPosition;
+        private PlayerInventory inventory;
+        private readonly System.Collections.Generic.List<(Transform bone, Quaternion open)> leftFingers =
+            new System.Collections.Generic.List<(Transform, Quaternion)>();
+        private bool leftFingersCaptured;
 
         private void Awake()
         {
@@ -63,7 +68,10 @@ namespace GWYFVR.Player
         private void Bind()
         {
             boundHead = LocalPlayer.Head;
-            leftBone = rightBone = itemHolder = null;
+            leftBone = rightBone = itemHolder = throwPosition = null;
+            inventory = null;
+            leftFingers.Clear();
+            leftFingersCaptured = false;
             if (boundHead == null)
                 return;
 
@@ -77,6 +85,8 @@ namespace GWYFVR.Player
             leftBone = armature.Find("Bone.005/Bone.L");
             rightBone = armature.Find("Bone.005/Bone.R");
             itemHolder = armature.Find("HandTransform");
+            inventory = boundHead.GetComponentInParent<PlayerInventory>();
+            throwPosition = inventory != null ? inventory.throwPosition : null;
 
             // The hands now move well away from where the mesh's bounds expect them; don't cull them.
             foreach (var skin in armature.GetComponentsInChildren<SkinnedMeshRenderer>(true))
@@ -106,7 +116,38 @@ namespace GWYFVR.Player
                     worldRotation * Quaternion.Euler(90f, 0f, 0f));
             }
 
+            // Items launch from the throw position: keep it on the right hand so throws leave the hand.
+            if (throwPosition != null && rightTracked)
+                throwPosition.SetPositionAndRotation(rightBone.position, itemHolder != null ? itemHolder.rotation : rightBone.rotation);
+
+            KeepLeftHandOpen();
+
             Active = leftTracked || rightTracked;
+        }
+
+        /// <summary>
+        /// The game animates both hands gripping a held item. Items are held in the right hand only in VR,
+        /// so while holding one, put the left hand's fingers back into their empty-handed pose.
+        /// </summary>
+        private void KeepLeftHandOpen()
+        {
+            var holding = inventory != null && inventory.NetworkholdingItem != null;
+            if (!holding)
+            {
+                // Remember what the fingers look like when the hands are empty.
+                leftFingers.Clear();
+                foreach (var bone in leftBone.GetComponentsInChildren<Transform>())
+                    if (bone != leftBone)
+                        leftFingers.Add((bone, bone.localRotation));
+                leftFingersCaptured = true;
+                return;
+            }
+
+            if (!leftFingersCaptured)
+                return;
+            foreach (var (bone, open) in leftFingers)
+                if (bone != null)
+                    bone.localRotation = open;
         }
 
         private static bool PlaceHand(Transform bone, Transform origin, XRNode node, bool left)
