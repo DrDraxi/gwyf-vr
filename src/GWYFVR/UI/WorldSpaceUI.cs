@@ -86,6 +86,14 @@ namespace GWYFVR.UI
             var stack = baseCamera.GetUniversalAdditionalCameraData().cameraStack;
             if (!stack.Contains(overlayCamera))
                 stack.Add(overlayCamera);
+
+            // Ride on the base camera so both always render from the same pose, even when the headset
+            // pose is updated again just before rendering.
+            if (overlayCamera.transform.parent != baseCamera.transform)
+            {
+                overlayCamera.transform.SetParent(baseCamera.transform, false);
+                overlayCamera.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            }
         }
 
         private void Update()
@@ -102,9 +110,6 @@ namespace GWYFVR.UI
             var rig = VRRig.Instance;
             if (rig == null || rig.Source == null)
                 return;
-
-            // The overlay camera must render from exactly the same pose as the headset camera.
-            overlayCamera.transform.SetPositionAndRotation(rig.VRCamera.transform.position, rig.VRCamera.transform.rotation);
 
             UpdateAnchor(rig.transform, rig.VRCamera.transform);
             UpdateHudAnchor(rig.VRCamera.transform);
