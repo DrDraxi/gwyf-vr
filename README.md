@@ -5,21 +5,27 @@ Player-facing docs (controls, settings, troubleshooting) live in [thunderstore/R
 
 ## How it works
 
-The game is a Unity 6 (6000.3), Mono, URP build with no XR support, so the mod brings its own:
+The game is a Unity 6 (6000.3), Mono, URP build with its XR support stripped, so the mod brings its own:
 
-- **Preloader patcher** (`src/GWYFVR.Preload`) registers Unity's OpenXR subsystem before the engine scans for it:
-  it writes `UnitySubsystems/UnityOpenXR/UnitySubsystemsManifest.json` and copies `UnityOpenXR.dll` and
-  `openxr_loader.dll` into the game's `Plugins/x86_64` folder.
-- **OpenXR bootstrap** (`XR/OpenXRBootstrap.cs`) creates the XR management settings, the OpenXR loader and the
-  controller interaction profiles at runtime, then starts the headset.
-- **VR rig** (`Player/VRRig.cs`) renders from its own camera instead of hijacking the game's. It follows whichever
-  camera the game is using (menus, cutscenes, the player) and disables it. While the local player is in control the
-  headset drives the player's head, so movement direction, interaction raycasts and what other players see all follow
-  your real head.
-- **Input** (`Input/`) adds OpenXR controller bindings to the game's own `Player` action map; turning is handled by the rig.
-- **UI** (`UI/`) moves screen space canvases onto a floating panel drawn by an overlay camera, with a controller laser
-  driving the game's `InputSystemUIInputModule`.
+- **Preloader patcher** (`src/GWYFVR.Preload`) registers Unity's OpenXR subsystem before the engine scans for it
+  (subsystem manifest plus `UnityOpenXR.dll`/`openxr_loader.dll` in `Plugins/x86_64`). It also swaps in XR-enabled
+  builds of URP and Core RP: their serialized layout is aligned to the game's copies with Mono.Cecil, written to
+  `BepInEx/cache/GWYFVR`, and loaded through Doorstop's search path.
+- **OpenXR bootstrap** (`XR/OpenXRBootstrap.cs`) creates the XR management settings, loader and interaction
+  profiles at runtime. `XR/URPXRSetup.cs` starts URP's XR system with shaders from the `gwyfvr_xrshaders` bundle;
+  the occlusion and visibility meshes stay off because the game's shaders can't draw them.
+- **VR rig** (`Player/`) renders from its own stereo camera that follows whichever camera the game is using. While
+  you play, the headset drives the player's head, room-scale moves the body, the game's hands follow the
+  controllers, and releasing a grip throws with the hand's velocity. `DesktopMirror` copies the left eye to the
+  game window.
+- **Input** (`Input/`): the game's Input System has no XR either, so poses and buttons come from
+  `UnityEngine.XR.InputDevices` and are fed to the game as a virtual gamepad. Harmony patches (`Patches/`) make
+  interaction, items, pings and sliders aim with the hand.
+- **UI** (`UI/`) moves screen space canvases onto world space panels drawn by an overlay camera. A laser drives a
+  virtual mouse through a hand-mounted pointer camera. Full-screen backgrounds are drawn on a sphere around you,
+  the main menu gets the home scene as scenery, and the settings menu gets a VR tab.
 
+Nothing the game sends over the network changes, so VR players stay compatible with players without the mod.
 This follows the approach of DaXcess's [LCVR](https://github.com/DaXcess/LCVR) and [RepoXR](https://github.com/DaXcess/RepoXR).
 
 ## Building
