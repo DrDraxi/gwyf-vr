@@ -16,28 +16,30 @@ Play **Gamble With Your Friends** in VR. Your friends can stay on flat screens, 
 | Move | Left stick |
 | Sprint | Left stick click |
 | Turn (snap or smooth) | Right stick left/right |
-| Jump | A |
+| Walk around | Just walk, room-scale moves your character |
+| Jump / climb out of the spawn box | A |
 | Crouch | B |
-| Interact / skip | Right grip |
-| Use item | Right trigger |
-| Throw item | Left grip |
-| Zoom | Left trigger |
+| Pick up and hold an item | Point at it, hold grip (either hand) |
+| Throw | Swing and let go of the grip |
+| Drop | Let go of the grip slowly |
+| Use a machine, button, slot | Point at it, press or hold trigger |
+| Use the held item | Trigger of the holding hand |
 | Ping | Right stick click |
-| Push to talk | X |
-| Emote wheel | Y |
-| Pause menu | Left menu button |
-| Click menus | Point with the right controller, pull the trigger |
+| Pause menu | Left B / menu |
+| Click menus | Point with the laser, pull the trigger |
 
-You walk where you look and interact with what you look at (a dot marks the centre of your view).
+The laser shows when you point at something you can interact with or at a menu.
+Press **F8** on the desktop window for calibration sliders (hand and laser angle, hand and item size).
 
 ## Settings
 
 Edit `BepInEx/config/io.github.drdraxi.gwyfvr.cfg` (or use your mod manager's config editor):
 
-- `TurnMode`, `SnapTurnAngle`, `SmoothTurnSpeed`
+- `TurnMode`, `SnapTurnAngle`, `SmoothTurnSpeed`, `RoomScale`, `PhysicalThrowing`, `ThrowStrength`
 - `StereoMode` (`MultiPass` is the most compatible, `SinglePassInstanced` is faster)
 - `RenderScale`
-- UI `Distance` and `Width`
+- Menu `Distance`/`Width`, HUD `HudDistance`/`HudWidth`/`HudTilt`
+- `SkipSplash`
 - `LeftHandedPointer`
 - `EnableVR` or launch option `--disable-vr` to play flat
 

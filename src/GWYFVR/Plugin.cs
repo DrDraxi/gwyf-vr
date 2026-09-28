@@ -14,7 +14,7 @@ namespace GWYFVR
     {
         public const string Guid = "io.github.drdraxi.gwyfvr";
         public const string Name = "GWYFVR";
-        public const string Version = "0.1.0";
+        public const string Version = "0.2.0";
 
         internal static ManualLogSource Log { get; private set; }
         internal static VRConfig Settings { get; private set; }
