@@ -129,6 +129,11 @@ namespace GWYFVR.UI
             // The emote wheel moves onto the hand (EmoteWheelMount) and drops its backdrop.
             if (graphic.GetComponentInParent<EmoteWheelController>(true) != null)
                 return false;
+            // Something inside a mask (a progress bar's fill pattern) only fills its bar, not the screen.
+            if (graphic.transform.parent != null &&
+                (graphic.transform.parent.GetComponentInParent<Mask>(true) != null ||
+                 graphic.transform.parent.GetComponentInParent<RectMask2D>(true) != null))
+                return false;
             // Full-screen render textures show other cameras (HUD, minimaps), not a background.
             if (graphic is RawImage raw && raw.texture is RenderTexture)
                 return false;
@@ -188,7 +193,9 @@ namespace GWYFVR.UI
                 return Vector2.one;
             }
 
-            return Vector2.Scale(tiles, PanelToSphere);
+            // Whole repeats only, so the pattern meets itself where the sphere wraps around.
+            var scale = Vector2.Scale(tiles, PanelToSphere);
+            return new Vector2(Mathf.Max(1f, Mathf.Round(scale.x)), Mathf.Max(1f, Mathf.Round(scale.y)));
         }
 
         private void Remove(Graphic key)

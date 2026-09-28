@@ -170,9 +170,36 @@ namespace GWYFVR.UI
                 return false;
 
             foreach (var selectable in canvas.GetComponentsInChildren<Selectable>())
-                if (selectable.IsInteractable())
+                if (IsUsable(selectable))
                     return true;
             return false;
+        }
+
+        /// <summary>
+        /// A button you can actually see and click. Screens like the round end stay active after they
+        /// fade out, with their buttons still "interactable" but invisible and not blocking raycasts;
+        /// counting those made the laser stick to empty air and blocked all interaction in the world.
+        /// </summary>
+        public static bool IsUsable(Selectable selectable)
+        {
+            if (!selectable.IsInteractable())
+                return false;
+            var graphic = selectable.targetGraphic;
+            if (graphic != null && graphic.canvasRenderer.GetInheritedAlpha() < 0.05f)
+                return false;
+
+            for (var t = selectable.transform; t != null; t = t.parent)
+            {
+                var group = t.GetComponent<CanvasGroup>();
+                if (group == null || !group.enabled)
+                    continue;
+                if (!group.blocksRaycasts || group.alpha < 0.05f)
+                    return false;
+                if (group.ignoreParentGroups)
+                    break;
+            }
+
+            return true;
         }
 
         private void ScanCanvases()
@@ -300,7 +327,7 @@ namespace GWYFVR.UI
         {
             foreach (var selectable in canvas.GetComponentsInChildren<Selectable>())
             {
-                if (!selectable.IsInteractable())
+                if (!IsUsable(selectable))
                     continue;
                 var rt = (RectTransform)selectable.transform;
                 if (rt.rect.Contains(rt.InverseTransformPoint(worldPoint)))
