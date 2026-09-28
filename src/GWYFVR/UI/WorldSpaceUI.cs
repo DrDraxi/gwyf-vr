@@ -224,10 +224,28 @@ namespace GWYFVR.UI
         }
 
         /// <summary>Intersect a ray with the visible, pointable canvases. Used to draw the laser.</summary>
+        private static bool HitsSelectable(Canvas canvas, Vector3 worldPoint)
+        {
+            foreach (var selectable in canvas.GetComponentsInChildren<Selectable>())
+            {
+                if (!selectable.IsInteractable())
+                    continue;
+                var rt = (RectTransform)selectable.transform;
+                if (rt.rect.Contains(rt.InverseTransformPoint(worldPoint)))
+                    return true;
+            }
+
+            return false;
+        }
+
         public bool Raycast(Ray ray, out Vector3 point)
         {
             point = default;
             var best = float.MaxValue;
+
+            // In game the HUD is always up; only count hits on actual buttons there, so the laser doesn't
+            // stick to the HUD. In menus any part of a menu panel counts.
+            var buttonsOnly = VRRig.Instance != null && VRRig.Instance.PlayerMode;
 
             foreach (var canvas in canvases)
             {
@@ -242,6 +260,8 @@ namespace GWYFVR.UI
                 var hit = ray.GetPoint(distance);
                 var local = rect.InverseTransformPoint(hit);
                 if (!rect.rect.Contains(local))
+                    continue;
+                if (buttonsOnly && !HitsSelectable(canvas, hit))
                     continue;
 
                 best = distance;
