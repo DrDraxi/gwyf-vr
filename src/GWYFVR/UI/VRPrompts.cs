@@ -100,41 +100,26 @@ namespace GWYFVR.UI
             return sprite;
         }
 
-        /// <summary>Hide a key button's text and show a glyph image in its place.</summary>
+        /// <summary>
+        /// Show a glyph instead of a key: the key button's own image becomes the glyph (it keeps its size
+        /// and layout), and the key's letter is hidden.
+        /// </summary>
         public static void ShowGlyph(GameObject keyButton, Sprite glyph)
         {
             foreach (var text in keyButton.GetComponentsInChildren<TextMeshProUGUI>(true))
                 if (!text.gameObject.name.ToLowerInvariant().Contains("hold"))
                     text.enabled = false;
 
-            // The glyphs are white; the keycap behind them is white too, so hide the keycap.
-            var keycap = keyButton.GetComponent<Image>();
-            if (keycap != null)
-                keycap.color = new Color(1f, 1f, 1f, 0f);
+            var image = keyButton.GetComponent<Image>();
+            if (image == null)
+                return;
 
-            var icon = keyButton.transform.Find("GWYFVR Glyph");
-            Image image;
-            if (icon == null)
-            {
-                var go = new GameObject("GWYFVR Glyph", typeof(RectTransform));
-                go.layer = keyButton.layer;
-                go.transform.SetParent(keyButton.transform, false);
-                var rect = (RectTransform)go.transform;
-                rect.anchorMin = Vector2.zero;
-                rect.anchorMax = Vector2.one;
-                rect.offsetMin = new Vector2(2f, 2f);
-                rect.offsetMax = new Vector2(-2f, -2f);
-                image = go.AddComponent<Image>();
-                image.preserveAspect = true;
-                image.raycastTarget = false;
-            }
-            else
-            {
-                image = icon.GetComponent<Image>();
-            }
-
-            image.sprite = glyph;
             image.enabled = true;
+            image.gameObject.SetActive(true);
+            image.sprite = glyph;
+            image.color = Color.white;
+            image.type = Image.Type.Simple;
+            image.preserveAspect = true;
         }
     }
 
@@ -164,9 +149,6 @@ namespace GWYFVR.UI
             if (glyph == null)
                 return;
 
-            var image = keyButton.GetComponent<Image>();
-            if (image != null)
-                image.enabled = false;
             VRPrompts.ShowGlyph(keyButton, glyph);
         }
 
