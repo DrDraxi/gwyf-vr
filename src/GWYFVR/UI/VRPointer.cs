@@ -124,8 +124,10 @@ namespace GWYFVR.UI
 
             var leftTracked = origin != null && Place(leftHand, origin, XRNode.LeftHand);
             var rightTracked = origin != null && Place(rightHand, origin, XRNode.RightHand);
-            leftHand.gameObject.SetActive(leftTracked);
-            rightHand.gameObject.SetActive(rightTracked);
+            // The game's own hands follow the controllers in game (VRHands), the cubes are for menus.
+            var gameHands = VRHands.Instance != null && VRHands.Instance.Active;
+            leftHand.gameObject.SetActive(leftTracked && !gameHands);
+            rightHand.gameObject.SetActive(rightTracked && !gameHands);
 
             var pointer = LeftHanded ? leftHand : rightHand;
             IsPointingAtMenu = false;

@@ -128,6 +128,38 @@ namespace GWYFVR
                     }
                     break;
 
+                case "hands":
+                    // hands rot x y z | hands pos x y z | hands item x y z
+                    {
+                        var h = args[1].Split(' ');
+                        var v = new Vector3(float.Parse(h[1], System.Globalization.CultureInfo.InvariantCulture),
+                            float.Parse(h[2], System.Globalization.CultureInfo.InvariantCulture),
+                            float.Parse(h[3], System.Globalization.CultureInfo.InvariantCulture));
+                        if (h[0] == "rot") VRHands.RotationOffset = v;
+                        if (h[0] == "pos") VRHands.PositionOffset = v;
+                        if (h[0] == "item") VRHands.ItemOffset = v;
+                        Plugin.Log.LogInfo($"Hands rot {VRHands.RotationOffset} pos {VRHands.PositionOffset} item {VRHands.ItemOffset}");
+                    }
+                    break;
+
+                case "find":
+                    // find text: log paths of all objects whose name contains text
+                    foreach (var t in FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                        if (t.name.IndexOf(args[1], StringComparison.OrdinalIgnoreCase) >= 0)
+                            Plugin.Log.LogInfo($"{PathOf(t)} active {t.gameObject.activeInHierarchy} layer {t.gameObject.layer} components [{string.Join(", ", System.Linq.Enumerable.Select(t.GetComponents<Component>(), c => c.GetType().Name))}]");
+                    break;
+
+                case "go":
+                    // go name [depth]: dump an object's hierarchy with components
+                    {
+                        var parts2 = args[1].Split(' ');
+                        var depth = parts2.Length > 1 ? int.Parse(parts2[1]) : 4;
+                        foreach (var t in FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                            if (t.name == parts2[0])
+                                LogObject(t, 0, depth);
+                    }
+                    break;
+
                 case "tree":
                     foreach (var root in FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                         if (root.isRootCanvas && root.name == (args.Length > 1 ? args[1] : ""))
@@ -176,6 +208,18 @@ namespace GWYFVR
 
             displays[0].GetRenderPass(0, out var pass);
             XRSubmitter.CaptureTarget(pass, 0);
+        }
+
+        private static string PathOf(Transform t) => t.parent == null ? t.name : PathOf(t.parent) + "/" + t.name;
+
+        private static void LogObject(Transform t, int depth, int maxDepth)
+        {
+            Plugin.Log.LogInfo($"{new string(' ', depth * 2)}{t.name}{(t.gameObject.activeSelf ? "" : " [inactive]")} layer {t.gameObject.layer} " +
+                               $"lpos {t.localPosition} lrot {t.localEulerAngles} lscale {t.localScale} " +
+                               $"[{string.Join(", ", System.Linq.Enumerable.Select(t.GetComponents<Component>(), c => c.GetType().Name))}]");
+            if (depth < maxDepth)
+                for (var i = 0; i < t.childCount; i++)
+                    LogObject(t.GetChild(i), depth + 1, maxDepth);
         }
 
         private static void LogTree(Transform t, int depth)

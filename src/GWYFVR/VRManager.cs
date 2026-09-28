@@ -28,6 +28,7 @@ namespace GWYFVR
             if (!XR.URPXRSetup.Active)
                 rig.AddComponent<XRSubmitter>();
             gameObject.AddComponent<VRPointer>();
+            rig.AddComponent<VRHands>();
             gameObject.AddComponent<VirtualGamepad>();
             gameObject.AddComponent<GazeDot>();
 
