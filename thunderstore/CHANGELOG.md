@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0 (alpha)
+
+- Main menu: the home scene as scenery behind a see-through menu, with a GWYF VR logo.
+- VR settings (turning, room-scale, throwing, grab by touch, drunk wobble) on the settings menu's Input tab.
+- Controller button prompts instead of keyboard keys (Kenney Input Prompts, CC0).
+- New controls: jump on right stick click, sprint toggle on left stick click, ping on right A, emote
+  wheel on the left hand (left A, pick with the stick), voice on right B, hold right A to skip screens.
+- Grab items by touching them with either hand, or with the laser.
+- Hand-aimed Quota Gun, Taser, Golden Chip, ping, Hi-Lo and bet sliders; the bat hits when you swing it.
+- Loading, round end and game over screens surround you; fades cover your whole view.
+- Body part machine: a lost eye gets a dark stitched patch; a rolling head stays upright.
+- The game window shows the left eye.
+- Fixes: a pink lens outline in the world, round end blocking interaction, the desktop mouse pulling
+  menu clicks away from the laser.
+
 ## 0.2.0 (alpha)
 
 First version tested on a real headset (Valve Index).

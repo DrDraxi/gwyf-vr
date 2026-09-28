@@ -77,6 +77,12 @@ namespace GWYFVR.XR
             // No occlusion mesh, see DisableOcclusionMesh.
             XRSystem.Initialize(allocator, null, mirror);
 
+            // Post-processing draws through the headset's visibility mesh with UberPost's second pass,
+            // which the game's copy of the shader doesn't have (it was built without XR): nothing gets
+            // drawn and the view goes black. Without the visibility mesh URP uses the normal pass.
+            typeof(XRSystem).GetMethod("SetUseVisibilityMesh", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
+                ?.Invoke(null, new object[] { false });
+
             // URP's XR motion vector pass (optional).
             var universalXR = urp.GetType("UnityEngine.Rendering.Universal.XRSystemUniversal");
             var initMotion = universalXR?.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
