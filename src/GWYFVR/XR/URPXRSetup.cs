@@ -20,6 +20,23 @@ namespace GWYFVR.XR
         /// <summary>True when the render pipeline can render to the headset.</summary>
         public static bool Active { get; private set; }
 
+        private static readonly FieldInfo OcclusionMaterialField =
+            typeof(XRSystem).GetField("s_OcclusionMeshMaterial", BindingFlags.Static | BindingFlags.NonPublic);
+
+        /// <summary>
+        /// The occlusion mesh only saves drawing the hidden corners of each eye. The game's renderer
+        /// creates its material from the game's own (XR-stripped) shader, which draws the lens outline as a
+        /// magenta shape standing at the world origin, so keep it cleared (URP skips the mesh without it).
+        /// </summary>
+        public static void DisableOcclusionMesh()
+        {
+            if (Active && OcclusionMaterialField != null && OcclusionMaterialField.GetValue(null) != null)
+            {
+                OcclusionMaterialField.SetValue(null, null);
+                Plugin.Log.LogInfo("Turned off the XR occlusion mesh");
+            }
+        }
+
         public static bool TryInitialize(string runtimeDeps)
         {
             // The stripped XRSystem has no display state at all.
@@ -57,8 +74,7 @@ namespace GWYFVR.XR
             }
 
             var allocator = (Func<XRPassCreateInfo, XRPass>)Delegate.CreateDelegate(typeof(Func<XRPassCreateInfo, XRPass>), create);
-            // No occlusion mesh: it only saves drawing the hidden corners of each eye, and with the game's
-            // shaders it ended up drawn as a magenta lens-shaped outline standing in the world.
+            // No occlusion mesh, see DisableOcclusionMesh.
             XRSystem.Initialize(allocator, null, mirror);
 
             // URP's XR motion vector pass (optional).

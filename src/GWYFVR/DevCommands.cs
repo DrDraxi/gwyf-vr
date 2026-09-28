@@ -194,6 +194,119 @@ namespace GWYFVR
                     }
                     break;
 
+                case "inview":
+                    // inview [degrees]: renderers near the middle of the headset view, nearest first
+                    {
+                        var cam = VRRig.Instance.VRCamera.transform;
+                        var maxAngle = args.Length > 1 ? float.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture) : 12f;
+                        var hits = new System.Collections.Generic.List<(float, string)>();
+                        foreach (var r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+                        {
+                            if (!r.enabled || !r.gameObject.activeInHierarchy)
+                                continue;
+                            var to = r.bounds.center - cam.position;
+                            if (to.magnitude > 15f || Vector3.Angle(cam.forward, to) > maxAngle)
+                                continue;
+                            var m = r.sharedMaterial;
+                            hits.Add((to.magnitude, $"{to.magnitude:F2}m {PathOf(r.transform)} ({r.GetType().Name}) layer {r.gameObject.layer} size {r.bounds.size} material '{(m != null ? m.name : "")}' shader '{(m != null ? m.shader.name : "")}' tex '{(m != null && m.mainTexture != null ? m.mainTexture.name : "")}'"));
+                        }
+                        foreach (var g in FindObjectsByType<Graphic>(FindObjectsSortMode.None))
+                        {
+                            if (!g.isActiveAndEnabled || g.canvas == null || g.gameObject.layer == WorldSpaceUI.Layer)
+                                continue;
+                            var to = g.transform.position - cam.position;
+                            if (to.magnitude > 15f || Vector3.Angle(cam.forward, to) > maxAngle)
+                                continue;
+                            hits.Add((to.magnitude, $"{to.magnitude:F2}m UI {PathOf(g.transform)} ({g.GetType().Name}) layer {g.gameObject.layer} canvas '{g.canvas.name}' material '{g.material.name}' shader '{g.material.shader.name}' tex '{(g.mainTexture != null ? g.mainTexture.name : "")}' color {g.color}"));
+                        }
+                        hits.Sort((a, b) => a.Item1.CompareTo(b.Item1));
+                        foreach (var h in hits)
+                            Plugin.Log.LogInfo(h.Item2);
+                    }
+                    break;
+
+                case "features":
+                    // features: list the headset camera's URP renderer features; features N 0/1: turn one off/on
+                    {
+                        var renderer = UnityEngine.Rendering.Universal.CameraExtensions.GetUniversalAdditionalCameraData(VRRig.Instance.VRCamera).scriptableRenderer;
+                        var list = (System.Collections.Generic.List<UnityEngine.Rendering.Universal.ScriptableRendererFeature>)typeof(UnityEngine.Rendering.Universal.ScriptableRenderer)
+                            .GetProperty("rendererFeatures", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)
+                            .GetValue(renderer);
+                        var parts2 = args.Length > 1 ? args[1].Split(' ') : new string[0];
+                        if (parts2.Length == 2)
+                            list[int.Parse(parts2[0])].SetActive(parts2[1] == "1");
+                        for (var i = 0; i < list.Count; i++)
+                            Plugin.Log.LogInfo($"Feature {i}: '{list[i]?.name}' {list[i]?.GetType().FullName} active {list[i]?.isActive}");
+                    }
+                    break;
+
+                case "near":
+                    // near x y z r: renderers, canvases and graphics within r metres of a point
+                    {
+                        var n = args[1].Split(' ');
+                        var ci = System.Globalization.CultureInfo.InvariantCulture;
+                        var point = new Vector3(float.Parse(n[0], ci), float.Parse(n[1], ci), float.Parse(n[2], ci));
+                        var radius = float.Parse(n[3], ci);
+                        foreach (var r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+                            if (r.enabled && (r.bounds.center - point).magnitude <= radius)
+                                Plugin.Log.LogInfo($"Near: {PathOf(r.transform)} ({r.GetType().Name}) layer {r.gameObject.layer} pos {r.bounds.center} material '{(r.sharedMaterial != null ? r.sharedMaterial.name : "")}' shader '{(r.sharedMaterial != null ? r.sharedMaterial.shader.name : "")}'");
+                        foreach (var g in FindObjectsByType<Graphic>(FindObjectsSortMode.None))
+                            if (g.isActiveAndEnabled && (g.transform.position - point).magnitude <= radius)
+                                Plugin.Log.LogInfo($"Near UI: {PathOf(g.transform)} ({g.GetType().Name}) layer {g.gameObject.layer} alpha {g.canvasRenderer.GetInheritedAlpha()} color {g.color} material '{g.material.name}' tex '{(g.mainTexture != null ? g.mainTexture.name : "")}'");
+                    }
+                    break;
+
+                case "rt":
+                    // rt name: save a render texture to BepInEx/gwyfvr-rt.png
+                    foreach (var rt in Resources.FindObjectsOfTypeAll<RenderTexture>())
+                        if (rt.name == args[1])
+                        {
+                            var previous = RenderTexture.active;
+                            RenderTexture.active = rt;
+                            var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
+                            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+                            RenderTexture.active = previous;
+                            File.WriteAllBytes(Path.Combine(Paths.BepInExRootPath, "gwyfvr-rt.png"), tex.EncodeToPNG());
+                            Destroy(tex);
+                            Plugin.Log.LogInfo($"Saved render texture '{rt.name}' {rt.width}x{rt.height}");
+                            break;
+                        }
+                    break;
+
+                case "active":
+                    // active name 0/1: turn every object with this name off or on
+                    {
+                        var a = args[1].Split(' ');
+                        foreach (var t in FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                            if (t.name == a[0])
+                            {
+                                t.gameObject.SetActive(a[1] == "1");
+                                Plugin.Log.LogInfo($"Set {PathOf(t)} active {a[1]}");
+                            }
+                    }
+                    break;
+
+                case "particles":
+                    // particles: particle systems that currently have particles, with where they are
+                    foreach (var ps in FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None))
+                        if (ps.particleCount > 0)
+                        {
+                            var pr = ps.GetComponent<ParticleSystemRenderer>();
+                            var cam = VRRig.Instance.VRCamera.transform;
+                            Plugin.Log.LogInfo($"Particles {PathOf(ps.transform)} count {ps.particleCount} dist {(ps.transform.position - cam.position).magnitude:F2}m angle {Vector3.Angle(cam.forward, ps.transform.position - cam.position):F0} space {ps.main.simulationSpace} layer {ps.gameObject.layer} material '{(pr != null && pr.sharedMaterial != null ? pr.sharedMaterial.name : "")}' shader '{(pr != null && pr.sharedMaterial != null ? pr.sharedMaterial.shader.name : "")}'");
+                        }
+                    break;
+
+                case "hide":
+                    // hide text: turn off renderers whose path contains text
+                    foreach (var r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+                        if (PathOf(r.transform).IndexOf(args[1], StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            r.enabled = false;
+                            Plugin.Log.LogInfo($"Hid {PathOf(r.transform)}");
+                        }
+                    break;
+
                 case "loading":
                     // loading 1/0: show or hide the game's loading screen
                     Extensions.MonoSingleton<SceneTransitioner>.Instance?.ForceSet(args.Length > 1 && args[1] == "1");

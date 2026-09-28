@@ -69,6 +69,7 @@ namespace GWYFVR.Player
 
         private void Update()
         {
+            XR.URPXRSetup.DisableOcclusionMesh();
             if (Source == null || !Source.gameObject.activeInHierarchy || Time.unscaledTime >= nextSourceScan)
             {
                 nextSourceScan = Time.unscaledTime + 0.5f;
