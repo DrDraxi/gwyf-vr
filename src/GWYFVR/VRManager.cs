@@ -43,6 +43,7 @@ namespace GWYFVR
             gameObject.AddComponent<VRLogo>();
             gameObject.AddComponent<ImmersiveScreens>();
             gameObject.AddComponent<SkipPrompts>();
+            gameObject.AddComponent<SettingsTabLabel>();
 
             if (Plugin.Settings.DevCommands.Value)
                 gameObject.AddComponent<DevCommands>();

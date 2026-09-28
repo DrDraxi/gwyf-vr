@@ -20,6 +20,9 @@ namespace GWYFVR.UI
 
         private static readonly List<SettingItemBase> Entries = new List<SettingItemBase>();
 
+        /// <summary>The game's name for the tab that now holds the VR settings (its button is relabelled "VR").</summary>
+        public static string VRTabName { get; private set; }
+
         public static void Install()
         {
             var layout = Resources.Load<SettingsLayout>("SettingsLayout");
@@ -30,13 +33,15 @@ namespace GWYFVR.UI
             }
 
             // The tab holding the key rebinding entries becomes the VR tab.
-            var tab = layout.tabs.FirstOrDefault(t => t != null && t.entries.Any(e => e is RebindSettingItem));
+            var tab = layout.tabs.FirstOrDefault(t => t != null && t.entries.Any(e => e is RebindSettingItem) ||
+                                                       t != null && t.entries.Any(e => e != null && e.key != null && e.key.StartsWith(KeyPrefix)));
             if (tab == null)
             {
                 Plugin.Log.LogWarning("No input settings tab found, VR settings are only in the config file");
                 return;
             }
 
+            VRTabName = tab.tabName;
             if (tab.entries.Any(e => e != null && e.key != null && e.key.StartsWith(KeyPrefix)))
                 return;
 

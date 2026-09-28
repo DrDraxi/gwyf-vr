@@ -187,8 +187,13 @@ namespace GWYFVR.UI
             var graphic = selectable.targetGraphic;
             if (graphic != null && graphic.canvasRenderer.GetInheritedAlpha() < 0.05f)
                 return false;
+            return IsShown(selectable.transform);
+        }
 
-            for (var t = selectable.transform; t != null; t = t.parent)
+        /// <summary>No faded-out or click-through canvas group above it.</summary>
+        private static bool IsShown(Transform transform)
+        {
+            for (var t = transform; t != null; t = t.parent)
             {
                 var group = t.GetComponent<CanvasGroup>();
                 if (group == null || !group.enabled)
@@ -336,6 +341,19 @@ namespace GWYFVR.UI
                 if (rt.rect.Contains(rt.InverseTransformPoint(worldPoint)))
                 {
                     LastHit = $"{canvas.name}/{selectable.name}";
+                    return true;
+                }
+            }
+
+            // Anywhere on a scrolling list counts too, so the stick scrolls it without aiming at the scrollbar.
+            foreach (var scroll in canvas.GetComponentsInChildren<ScrollRect>())
+            {
+                if (!scroll.isActiveAndEnabled || !IsShown(scroll.transform))
+                    continue;
+                var rt = (RectTransform)scroll.transform;
+                if (rt.rect.Contains(rt.InverseTransformPoint(worldPoint)))
+                {
+                    LastHit = $"{canvas.name}/{scroll.name}";
                     return true;
                 }
             }
