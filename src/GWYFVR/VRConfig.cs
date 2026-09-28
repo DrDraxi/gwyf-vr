@@ -26,6 +26,7 @@ namespace GWYFVR
         public readonly ConfigEntry<StereoMode> RenderMode;
         public readonly ConfigEntry<float> RenderScale;
         public readonly ConfigEntry<bool> PostProcessing;
+        public readonly ConfigEntry<bool> DesktopMirror;
 
         public readonly ConfigEntry<TurnMode> Turning;
         public readonly ConfigEntry<float> SnapTurnAngle;
@@ -75,6 +76,8 @@ namespace GWYFVR
 
             PostProcessing = config.Bind("Rendering", "PostProcessing", false,
                 "Use the game's post-processing effects. They currently render black in VR, leave off.");
+            DesktopMirror = config.Bind("Rendering", "DesktopMirror", true,
+                "Show the left eye in the game window.");
 
             Turning = config.Bind("Controls", "TurnMode", TurnMode.Snap, "How the right thumbstick turns you.");
             SnapTurnAngle = config.Bind("Controls", "SnapTurnAngle", 45f,

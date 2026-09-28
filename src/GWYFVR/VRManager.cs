@@ -32,12 +32,15 @@ namespace GWYFVR
             rig.AddComponent<VRThrowing>();
             rig.AddComponent<RoomScale>();
             rig.AddComponent<VREyePatches>();
+            if (XR.URPXRSetup.Active)
+                rig.AddComponent<DesktopMirror>();
             gameObject.AddComponent<HandCalibration>();
             gameObject.AddComponent<MenuBackdrop>();
             VRSettingsMenu.Install();
             gameObject.AddComponent<VirtualGamepad>();
             gameObject.AddComponent<GazeDot>();
             gameObject.AddComponent<EmoteWheelMount>();
+            gameObject.AddComponent<VRLogo>();
 
             if (Plugin.Settings.DevCommands.Value)
                 gameObject.AddComponent<DevCommands>();

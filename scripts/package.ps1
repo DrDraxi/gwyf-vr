@@ -17,6 +17,7 @@ Copy-Item "$root\src\GWYFVR\bin\$Configuration\netstandard2.1\GWYFVR.dll" "$stag
 Copy-Item "$root\lib\RuntimeDeps\*" "$stage\plugins\GWYFVR\RuntimeDeps" -Recurse
 New-Item -ItemType Directory -Force "$stage\plugins\GWYFVR\Prompts" | Out-Null
 Copy-Item "$root\assets\prompts\*" "$stage\plugins\GWYFVR\Prompts"
+Copy-Item "$root/assets/logo-vr.png" "$stage/plugins/GWYFVR"
 Copy-Item "$root\src\GWYFVR.Preload\bin\$Configuration\netstandard2.1\GWYFVR.Preload.dll" "$stage\patchers\GWYFVR"
 
 $zip = Join-Path $root "dist\GWYFVR-$version.zip"

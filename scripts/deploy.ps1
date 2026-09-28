@@ -17,6 +17,7 @@ Copy-Item "$root\src\GWYFVR\bin\$Configuration\netstandard2.1\GWYFVR.dll" $plugi
 Copy-Item "$root\lib\RuntimeDeps\*" "$plugin\RuntimeDeps" -Recurse -Force
 New-Item -ItemType Directory -Force "$plugin\Prompts" | Out-Null
 Copy-Item "$root\assets\prompts\*" "$plugin\Prompts" -Force
+Copy-Item "$root/assets/logo-vr.png" $plugin -Force
 Copy-Item "$root\src\GWYFVR.Preload\bin\$Configuration\netstandard2.1\GWYFVR.Preload.dll" $patcher -Force
 
 Write-Host "Deployed to $GameDir"
