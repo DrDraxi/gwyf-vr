@@ -10,8 +10,6 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Post-processing in VR: rebuild the XR-enabled render pipeline with the exact game Unity version
   (6000.3.6f1); the 6000.3.7 build is missing a pass in the game's UberPost shader.
 
-- Emote wheel on the left hand: check in the headset that it sits well above the controller, that the
-  dark full-screen backdrop is gone, and that stick directions line up with the emotes.
 - Optional: a smoothed flat spectator camera for the game window instead of the raw eye view.
 - Grip/trigger fresh-press detection is per active hand; pressing the other hand while one is held can be missed.
 
@@ -23,6 +21,7 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Menu scrolling with the stick, grab only on a fresh grip press.
 - Controls: jump on right stick click, sprint toggle on left stick click, ping on right A, emote wheel
   on left A with stick selection.
+- Emote wheel on the left hand, sized to taste.
 - Game window mirrors the left eye in game; VR logo on the main and pause menus.
 
 ## Done in 0.2.0-alpha
