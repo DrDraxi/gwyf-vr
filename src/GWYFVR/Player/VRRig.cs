@@ -52,7 +52,7 @@ namespace GWYFVR.Player
             cameraObject.transform.SetParent(transform, false);
             VRCamera = cameraObject.AddComponent<Camera>();
             VRCamera.stereoTargetEye = HeadsetEyes;
-            VRCamera.nearClipPlane = 0.02f;
+            VRCamera.nearClipPlane = 0.01f;
             VRCamera.enabled = false;
             XRDevice.DisableAutoXRCameraTracking(VRCamera, true);
 
@@ -167,7 +167,7 @@ namespace GWYFVR.Player
             to.clearFlags = from.clearFlags;
             to.backgroundColor = from.backgroundColor;
             to.cullingMask = from.cullingMask & ~(1 << UI.WorldSpaceUI.Layer);
-            to.nearClipPlane = Mathf.Min(from.nearClipPlane, 0.05f);
+            to.nearClipPlane = Mathf.Min(from.nearClipPlane, 0.01f);
             to.farClipPlane = from.farClipPlane;
             to.depth = from.depth;
             to.allowHDR = from.allowHDR;
