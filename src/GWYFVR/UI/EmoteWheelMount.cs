@@ -13,7 +13,8 @@ namespace GWYFVR.UI
     /// </summary>
     public class EmoteWheelMount : MonoBehaviour
     {
-        private const float Diameter = 0.16f;
+        // Width of the wheel's layout rect, which is much larger than the visible circle.
+        private const float Diameter = 1.28f;
         private static readonly Vector3 Offset = new Vector3(0f, 0.07f, 0.02f);
         private static readonly Vector2 VirtualScreen = new Vector2(1920f, 1080f);
 
