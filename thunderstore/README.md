@@ -35,7 +35,9 @@ Press **F8** on the desktop window for calibration sliders (hand and laser angle
 
 ## Settings
 
-Edit `BepInEx/config/io.github.drdraxi.gwyfvr.cfg` (or use your mod manager's config editor):
+The **VR** tab of the game's settings menu has turning, room-scale, throwing, grab by touch,
+post-processing and the drunk wobble. Everything else is in `BepInEx/config/io.github.drdraxi.gwyfvr.cfg`
+(or your mod manager's config editor):
 
 - `TurnMode`, `SnapTurnAngle`, `SmoothTurnSpeed`, `RoomScale`, `PhysicalThrowing`, `ThrowStrength`
 - `StereoMode` (`MultiPass` is the most compatible, `SinglePassInstanced` is faster)

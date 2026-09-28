@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 (alpha)
+
+- The VR settings tab is labelled "VR".
+- The stick scrolls menus when pointing anywhere on a list, at a gentler speed.
+
 ## 0.3.0 (alpha)
 
 - Main menu: the home scene as scenery behind a see-through menu, with a GWYF VR logo.
