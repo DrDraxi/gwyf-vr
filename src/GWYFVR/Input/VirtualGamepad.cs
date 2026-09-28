@@ -9,7 +9,7 @@ namespace GWYFVR.Input
     /// every action and for menu navigation, so this is all it takes to play with VR controllers.
     ///
     /// Mapping (game's gamepad binding in brackets):
-    ///   left stick = move [left stick], left stick click = jump [south], right stick click = sprint toggle
+    ///   left stick = move [left stick], right stick click = jump [south], left stick click = sprint toggle
     ///   [left trigger] (off when you stop moving), right A = ping [right stick press] (climbs out of the
     ///   spawn box while locked in it [west]), B = crouch [east], left A = emote wheel,
     ///   grip on an item = pick it up [west], trigger on a machine/button = interact [west],
@@ -25,7 +25,8 @@ namespace GWYFVR.Input
         private bool lastActiveGrip;
         private bool lastActiveTrigger;
         private bool sprinting;
-        private bool lastRightStickClick;
+        private bool lastLeftStickClick;
+        private float lastMovingTime;
 
 
         private void OnDestroy()
@@ -85,11 +86,17 @@ namespace GWYFVR.Input
 
             VREmoteWheel.Update(l);
 
-            // Sprint toggles on with a right stick click and switches itself off when you stop moving.
-            if (r.StickClick && !lastRightStickClick)
+            // Sprint toggles on with a left stick click and switches itself off when you stop moving. Clicking
+            // the stick can briefly centre it, so it has to stay released for a moment to count as stopping.
+            if (l.Stick.magnitude >= 0.2f || l.StickClick)
+                lastMovingTime = Time.unscaledTime;
+            if (l.StickClick && !lastLeftStickClick && !VREmoteWheel.Open)
+            {
                 sprinting = !sprinting;
-            lastRightStickClick = r.StickClick;
-            if (l.Stick.magnitude < 0.2f)
+                lastMovingTime = Time.unscaledTime;
+            }
+            lastLeftStickClick = l.StickClick;
+            if (Time.unscaledTime - lastMovingTime > 0.3f)
                 sprinting = false;
 
             var state = new GamepadState
@@ -100,7 +107,7 @@ namespace GWYFVR.Input
             };
 
             state = state
-                .WithButton(GamepadButton.South, l.StickClick && !VREmoteWheel.Open)
+                .WithButton(GamepadButton.South, r.StickClick)
                 .WithButton(GamepadButton.East, r.Secondary)
                 .WithButton(GamepadButton.West, interactPressed)
                 .WithButton(GamepadButton.RightShoulder, useItem)

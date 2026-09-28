@@ -88,8 +88,9 @@ namespace GWYFVR.Input
             if (__instance.elements[index] != null)
                 __instance.selectButton(index);
 
+            // Local rotation: the wheel lies tilted on the hand, not flat on the screen.
             if (__instance.useSelectionFollower && __instance.selectionFollowerContainer != null)
-                __instance.selectionFollowerContainer.rotation = Quaternion.Euler(0f, 0f, angle + 270f);
+                __instance.selectionFollowerContainer.localRotation = Quaternion.Euler(0f, 0f, angle + 270f);
 
             return false;
         }

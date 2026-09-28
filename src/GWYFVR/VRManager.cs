@@ -37,6 +37,7 @@ namespace GWYFVR
             VRSettingsMenu.Install();
             gameObject.AddComponent<VirtualGamepad>();
             gameObject.AddComponent<GazeDot>();
+            gameObject.AddComponent<EmoteWheelMount>();
 
             if (Plugin.Settings.DevCommands.Value)
                 gameObject.AddComponent<DevCommands>();

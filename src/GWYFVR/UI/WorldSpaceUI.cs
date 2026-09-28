@@ -275,7 +275,18 @@ namespace GWYFVR.UI
 
         private static float Div(float a, float b) => Mathf.Approximately(b, 0f) ? a : a / b;
 
-        private static void SetLayer(Transform root)
+        /// <summary>
+        /// Stop placing a converted canvas on the VR panels, for canvases the mod positions itself
+        /// (the emote wheel on the hand).
+        /// </summary>
+        public void Release(Canvas canvas)
+        {
+            converted.Add(canvas);
+            canvases.Remove(canvas);
+            menus.Remove(canvas);
+        }
+
+        public static void SetLayer(Transform root)
         {
             if (root.gameObject.layer != Layer)
                 root.gameObject.layer = Layer;

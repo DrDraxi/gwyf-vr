@@ -14,17 +14,19 @@ Play **Gamble With Your Friends** in VR. Your friends can stay on flat screens, 
 | Action | Controller |
 | --- | --- |
 | Move | Left stick |
-| Sprint | Left stick click |
+| Sprint | Left stick click (toggles, turns off when you stop) |
 | Turn (snap or smooth) | Right stick left/right |
 | Walk around | Just walk, room-scale moves your character |
-| Jump / climb out of the spawn box | A |
-| Crouch | B |
+| Jump | Right stick click |
+| Climb out of the spawn box | Right A |
+| Crouch | Right B |
 | Pick up and hold an item | Point at it, hold grip (either hand) |
 | Throw | Swing and let go of the grip |
 | Drop | Let go of the grip slowly |
 | Use a machine, button, slot | Point at it, press or hold trigger |
 | Use the held item | Trigger of the holding hand |
-| Ping | Right stick click |
+| Ping | Right A |
+| Emote wheel | Left A, push the left stick toward an emote and let go (left A again cancels) |
 | Pause menu | Left B / menu |
 | Click menus | Point with the laser, pull the trigger |
 

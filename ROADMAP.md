@@ -10,7 +10,10 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Post-processing in VR: rebuild the XR-enabled render pipeline with the exact game Unity version
   (6000.3.6f1); the 6000.3.7 build is missing a pass in the game's UberPost shader.
 
-- Emote wheel has no VR button yet.
+- Emote wheel on the left hand: check in the headset that it sits well above the controller, that the
+  dark full-screen backdrop is gone, and that stick directions line up with the emotes.
+- Game window: check it now mirrors the headset view in game (the flat UI camera is switched off).
+- Optional: a smoothed flat spectator camera for the game window instead of the raw eye view.
 - Grip/trigger fresh-press detection is per active hand; pressing the other hand while one is held can be missed.
 
 ## Done since 0.2.0-alpha
@@ -19,6 +22,8 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - VR controller prompts (Kenney Input Prompts, CC0); corner control hints and bottom info text hidden.
 - Body part machine: missing eye patched per eye; rolling head stays upright.
 - Menu scrolling with the stick, grab only on a fresh grip press.
+- Controls: jump on right stick click, sprint toggle on left stick click, ping on right A, emote wheel
+  on left A with stick selection.
 
 ## Done in 0.2.0-alpha
 - VR rendering, head tracking, turning, room-scale, controller hands, grab/throw, laser pointer, menus/HUD.
