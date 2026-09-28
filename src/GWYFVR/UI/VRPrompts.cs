@@ -140,6 +140,14 @@ namespace GWYFVR.UI
                 VRPrompts.ShowGlyph(__result, glyph);
         }
 
+        /// <summary>
+        /// The keyboard/mouse control hints in the corner of the screen ("Throw HOLD", "Ping") make no
+        /// sense in VR; the prompts on the things you point at are enough.
+        /// </summary>
+        [HarmonyPatch(typeof(HeldItemActionPanel), nameof(HeldItemActionPanel.CreateActionElement))]
+        [HarmonyPrefix]
+        private static bool HideControlHints() => false;
+
         /// <summary>Held item action hints like "Left Click: Use".</summary>
         [HarmonyPatch(typeof(HeldItemActionPanel), nameof(HeldItemActionPanel.SetupKeyButton))]
         [HarmonyPostfix]

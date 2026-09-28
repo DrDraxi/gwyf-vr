@@ -222,8 +222,20 @@ namespace GWYFVR.UI
                 scaler.dynamicPixelsPerUnit = 1f;
 
             SetLayer(canvas.transform);
+            HideClutter(canvas.transform);
 
             Plugin.Log.LogInfo($"Moved canvas '{canvas.name}' into world space");
+        }
+
+        /// <summary>Small info text at the bottom of the screen (lobby id, version) just clutters VR.</summary>
+        private static void HideClutter(Transform canvas)
+        {
+            foreach (var t in canvas.GetComponentsInChildren<Transform>(true))
+            {
+                var name = t.name.ToLowerInvariant();
+                if (name == "sessionid" || name == "version")
+                    t.gameObject.SetActive(false);
+            }
         }
 
         private void PlaceCanvases(bool inGame)
