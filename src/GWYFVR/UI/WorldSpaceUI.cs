@@ -72,7 +72,7 @@ namespace GWYFVR.UI
             overlayCamera = overlayObject.AddComponent<Camera>();
             overlayCamera.cullingMask = 1 << Layer;
             overlayCamera.clearFlags = CameraClearFlags.Depth;
-            overlayCamera.nearClipPlane = 0.02f;
+            overlayCamera.nearClipPlane = 0.01f;
             overlayCamera.stereoTargetEye = VRRig.HeadsetEyes;
             var data = overlayCamera.GetUniversalAdditionalCameraData();
             data.renderType = CameraRenderType.Overlay;

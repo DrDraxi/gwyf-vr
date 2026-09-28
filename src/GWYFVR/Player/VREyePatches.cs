@@ -23,7 +23,11 @@ namespace GWYFVR.Player
 
         private void Awake()
         {
+            // Drawn by the UI overlay camera, after the UI, so nothing (menus, outlines) shows through.
             var material = UI.VRMaterials.Unlit(Color.black);
+            material.renderQueue = 5000;
+            if (material.HasProperty("_ZTest"))
+                material.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
             leftPatch = CreatePatch("VRLeftEyePatch", material);
             rightPatch = CreatePatch("VRRightEyePatch", material);
         }
@@ -38,6 +42,7 @@ namespace GWYFVR.Player
             var renderer = patch.GetComponent<Renderer>();
             renderer.sharedMaterial = material;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            patch.gameObject.layer = UI.WorldSpaceUI.Layer;
             patch.gameObject.SetActive(false);
             return patch;
         }
