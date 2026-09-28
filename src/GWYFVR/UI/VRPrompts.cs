@@ -34,7 +34,10 @@ namespace GWYFVR.UI
             {
                 case "e":
                 case "interact":
-                    // Items are grabbed with the grip, everything else is used with the trigger.
+                    // Locked in place (the spawn box) A interacts; items are grabbed with the grip,
+                    // everything else is used with the trigger.
+                    if (PlayerLocked())
+                        return Load("quest_button_a");
                     return Load(InteractTargetIsItem() ? "quest_grip_right" : "quest_trigger_right");
                 case "left click":
                 case "lmb":
@@ -61,6 +64,12 @@ namespace GWYFVR.UI
                 default:
                     return null;
             }
+        }
+
+        private static bool PlayerLocked()
+        {
+            var controller = Player.LocalPlayer.Controller;
+            return controller != null && controller.IsLocked;
         }
 
         private static bool InteractTargetIsItem()
@@ -97,6 +106,11 @@ namespace GWYFVR.UI
             foreach (var text in keyButton.GetComponentsInChildren<TextMeshProUGUI>(true))
                 if (!text.gameObject.name.ToLowerInvariant().Contains("hold"))
                     text.enabled = false;
+
+            // The glyphs are white; the keycap behind them is white too, so hide the keycap.
+            var keycap = keyButton.GetComponent<Image>();
+            if (keycap != null)
+                keycap.color = new Color(1f, 1f, 1f, 0f);
 
             var icon = keyButton.transform.Find("GWYFVR Glyph");
             Image image;
