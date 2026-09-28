@@ -50,14 +50,16 @@ namespace GWYFVR.UI
                 case "mmb":
                     return Load("quest_stick_r_press");
                 case "space":
-                    return Load("quest_button_a");
+                    return Load("quest_stick_l_press");
                 case "ctrl":
                 case "control":
                 case "left ctrl":
                     return Load("quest_button_b");
                 case "shift":
                 case "left shift":
-                    return Load("quest_stick_l_press");
+                    return Load("quest_button_a");
+                case "r":
+                    return Load("quest_button_x");
                 case "esc":
                 case "escape":
                     return Load("quest_button_menu");

@@ -9,8 +9,8 @@ namespace GWYFVR.Input
     /// every action and for menu navigation, so this is all it takes to play with VR controllers.
     ///
     /// Mapping (game's gamepad binding in brackets):
-    ///   left stick = move [left stick], left stick click = sprint [left trigger],
-    ///   A = jump [south] (climbs out of the spawn box while locked in it [west]), B = crouch [east],
+    ///   left stick = move [left stick], left stick click = jump [south], right A = sprint [left trigger]
+    ///   (climbs out of the spawn box while locked in it [west]), B = crouch [east], left A = emote wheel,
     ///   grip on an item = pick it up [west], trigger on a machine/button = interact [west],
     ///   trigger while holding = use item [right shoulder], right stick click = ping [right stick press],
     ///   left B / menu = pause [start]. Throwing is physical (see VRThrowing).
@@ -80,14 +80,17 @@ namespace GWYFVR.Input
             // The trigger of the hand holding an item uses the item.
             var useItem = !pointingAtMenu && holding && HandRoles.Holding.Trigger && !(target != null && !targetIsItem);
 
+            VREmoteWheel.Update(l);
+
             var state = new GamepadState
             {
-                leftStick = l.Stick,
-                leftTrigger = l.StickClick ? 1f : 0f,
+                // While the emote wheel is open the left stick picks an emote instead of moving.
+                leftStick = VREmoteWheel.Open ? Vector2.zero : l.Stick,
+                leftTrigger = r.Primary && !locked ? 1f : 0f,
             };
 
             state = state
-                .WithButton(GamepadButton.South, r.Primary && !locked)
+                .WithButton(GamepadButton.South, l.StickClick && !VREmoteWheel.Open)
                 .WithButton(GamepadButton.East, r.Secondary)
                 .WithButton(GamepadButton.West, interactPressed)
                 .WithButton(GamepadButton.RightShoulder, useItem)
