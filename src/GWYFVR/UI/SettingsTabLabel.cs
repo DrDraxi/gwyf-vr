@@ -7,6 +7,7 @@ namespace GWYFVR.UI
     public class SettingsTabLabel : MonoBehaviour
     {
         private float nextScan;
+        private readonly System.Collections.Generic.HashSet<Transform> logged = new System.Collections.Generic.HashSet<Transform>();
 
         private void Update()
         {
@@ -20,11 +21,14 @@ namespace GWYFVR.UI
 
             foreach (var settings in Object.FindObjectsByType<SettingsLayoutRuntimeUI>(FindObjectsSortMode.None))
             {
-                // The tab buttons sit next to the settings content, under the same screen.
-                var screen = settings.transform.parent != null ? settings.transform.parent : settings.transform;
+                // The tab buttons can sit anywhere on the settings screen's canvas.
+                var canvas = settings.GetComponentInParent<Canvas>();
+                var screen = canvas != null ? canvas.rootCanvas.transform : settings.transform.root;
+                var found = false;
                 foreach (var text in screen.GetComponentsInChildren<TMP_Text>(true))
                 {
-                    var value = text.text.Trim();
+                    // Labels come wrapped in rich text tags ("<noparse></noparse>Input").
+                    var value = System.Text.RegularExpressions.Regex.Replace(text.text, "<[^>]*>", "").Trim();
                     if (value == "VR" || !(string.Equals(value, tabName, System.StringComparison.OrdinalIgnoreCase) ||
                                            string.Equals(value, "Input", System.StringComparison.OrdinalIgnoreCase)))
                         continue;
@@ -34,7 +38,17 @@ namespace GWYFVR.UI
                         if (component != text && component.GetType().Name.Contains("Locali"))
                             component.enabled = false;
                     text.text = "VR";
+                    found = true;
+                    Plugin.Log.LogInfo($"Relabelled settings tab '{text.name}' to VR");
                 }
+
+                if (!found && logged.Add(screen))
+                    foreach (var button in screen.GetComponentsInChildren<UnityEngine.UI.Button>(true))
+                    {
+                        var label = button.GetComponentInChildren<TMP_Text>(true);
+                        if (label != null && label.text.Length < 40)
+                            Plugin.Log.LogInfo($"Settings tab candidate '{button.name}' text '{label.text}'");
+                    }
             }
         }
     }
