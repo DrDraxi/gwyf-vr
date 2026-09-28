@@ -32,6 +32,7 @@ namespace GWYFVR
             rig.AddComponent<VRThrowing>();
             rig.AddComponent<RoomScale>();
             gameObject.AddComponent<HandCalibration>();
+            gameObject.AddComponent<MenuBackdrop>();
             gameObject.AddComponent<VirtualGamepad>();
             gameObject.AddComponent<GazeDot>();
 

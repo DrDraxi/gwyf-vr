@@ -20,6 +20,9 @@ namespace GWYFVR
         public readonly ConfigEntry<bool> EnableVR;
         public readonly ConfigEntry<string> OpenXRRuntimeFile;
         public readonly ConfigEntry<bool> SkipSplash;
+        public readonly ConfigEntry<string> MenuBackdropScene;
+        public readonly ConfigEntry<Vector3> MenuBackdropPosition;
+        public readonly ConfigEntry<float> MenuBackdropYaw;
         public readonly ConfigEntry<StereoMode> RenderMode;
         public readonly ConfigEntry<float> RenderScale;
         public readonly ConfigEntry<bool> PostProcessing;
@@ -57,6 +60,13 @@ namespace GWYFVR
 
             SkipSplash = config.Bind("General", "SkipSplash", true,
                 "Skip the coin flip question at start-up and go straight to the main menu.");
+
+            MenuBackdropScene = config.Bind("General", "MenuBackdropScene", "HomeScene",
+                "Game scene shown (as static scenery) behind the main menu in VR. Empty to disable.");
+            MenuBackdropPosition = config.Bind("General", "MenuViewpoint", new Vector3(7.4f, 6.97f, -14.7f),
+                "Where you stand in the menu backdrop scene (eye position).");
+            MenuBackdropYaw = config.Bind("General", "MenuViewpointYaw", 0f,
+                "Which way you face in the menu backdrop scene, in degrees.");
 
             RenderMode = config.Bind("Rendering", "StereoMode", StereoMode.MultiPass,
                 "MultiPass is the most compatible. SinglePassInstanced is faster but some game shaders may render in one eye only.");

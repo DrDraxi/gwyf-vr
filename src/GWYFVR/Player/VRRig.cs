@@ -145,6 +145,23 @@ namespace GWYFVR.Player
                 FaceYaw(LocalPlayer.Head.transform.eulerAngles.y);
         }
 
+        /// <summary>Re-apply camera settings, e.g. when the menu backdrop appears or goes away.</summary>
+        public void RefreshCamera()
+        {
+            if (Source != null)
+                Adopt(Source);
+        }
+
+        /// <summary>While the menu backdrop is loaded, stand in it instead of following the menu camera.</summary>
+        private static Transform BackdropViewpoint
+        {
+            get
+            {
+                var backdrop = UI.MenuBackdrop.Instance;
+                return backdrop != null && backdrop.Active ? backdrop.Viewpoint : null;
+            }
+        }
+
         private static void CopyCameraSettings(Camera from, Camera to)
         {
             to.clearFlags = from.clearFlags;
@@ -184,6 +201,19 @@ namespace GWYFVR.Player
                     dst.cameraStack.Add(overlay);
 
             UI.WorldSpaceUI.Instance?.AttachOverlayCamera(to);
+
+            // The menu camera only draws UI; with the backdrop loaded, draw the scenery like a normal camera.
+            if (BackdropViewpoint != null)
+            {
+                to.cullingMask = ~(1 << UI.WorldSpaceUI.Layer);
+                to.clearFlags = CameraClearFlags.Skybox;
+                to.farClipPlane = 1000f;
+                dst.renderPostProcessing = false;
+                if (RendererIndexField != null)
+                    RendererIndexField.SetValue(dst, -1);
+                dst.cameraStack.Clear();
+                UI.WorldSpaceUI.Instance?.AttachOverlayCamera(to);
+            }
         }
 
         internal static int RendererIndexOf(UniversalAdditionalCameraData data) =>
@@ -255,7 +285,14 @@ namespace GWYFVR.Player
             // Otherwise (menus, cutscenes) the game camera's view becomes "straight ahead", including
             // its pitch, so top-down menu cameras still show what they point at. Roll is dropped.
             var rigRotation = Quaternion.Euler(0f, turnYaw, 0f);
-            if (!PlayerMode)
+            var anchor = Source.transform;
+            var viewpoint = PlayerMode ? null : BackdropViewpoint;
+            if (viewpoint != null)
+            {
+                anchor = viewpoint;
+                rigRotation = Quaternion.Euler(0f, viewpoint.eulerAngles.y + turnYaw, 0f);
+            }
+            else if (!PlayerMode)
             {
                 var source = Source.transform.eulerAngles;
                 rigRotation = Quaternion.Euler(source.x, source.y + turnYaw, 0f);
@@ -263,7 +300,7 @@ namespace GWYFVR.Player
 
             // Put the headset's eye exactly where the game camera is. Physical movement is not added on
             // top, which keeps the view and the player's body in sync.
-            transform.SetPositionAndRotation(Source.transform.position - rigRotation * headPos, rigRotation);
+            transform.SetPositionAndRotation(anchor.position - rigRotation * headPos, rigRotation);
             VRCamera.transform.SetLocalPositionAndRotation(headPos, headRot);
         }
     }
