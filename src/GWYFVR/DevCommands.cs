@@ -35,8 +35,23 @@ namespace GWYFVR
 
         private void Awake() => Instance = this;
 
+        private bool lastGrip, lastTrigger;
+
+        /// <summary>Logs what every grip or trigger press was aimed at, to debug blocked interaction after the fact.</summary>
+        private void LogPresses()
+        {
+            var hand = GWYFVR.Input.HandRoles.Active;
+            var grip = GWYFVR.Input.XRControllers.Left.Grip || GWYFVR.Input.XRControllers.Right.Grip;
+            var trigger = GWYFVR.Input.XRControllers.Left.Trigger || GWYFVR.Input.XRControllers.Right.Trigger;
+            if ((grip && !lastGrip) || (trigger && !lastTrigger))
+                Run(new[] { "state" }, $"{(grip && !lastGrip ? "Grip" : "Trigger")} press: ");
+            lastGrip = grip;
+            lastTrigger = trigger;
+        }
+
         private void Update()
         {
+            LogPresses();
             if (Time.unscaledTime < nextCheck)
                 return;
             nextCheck = Time.unscaledTime + 0.5f;
@@ -71,7 +86,21 @@ namespace GWYFVR
             }
         }
 
-        private static void Run(string[] args)
+        /// <summary>The first collider along the pointing hand's ray, with its layer.</summary>
+        private static string RayHit()
+        {
+            var cam = VRPointer.Instance != null ? VRPointer.Instance.PointerCamera : null;
+            if (cam == null)
+                return "";
+            var hits = Physics.RaycastAll(cam.transform.position, cam.transform.forward, 5f, ~0, QueryTriggerInteraction.Collide);
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            var sb = new StringBuilder();
+            for (var i = 0; i < hits.Length && i < 4; i++)
+                sb.Append($"{PathOf(hits[i].collider.transform)} [{LayerMask.LayerToName(hits[i].collider.gameObject.layer)}{(hits[i].collider.isTrigger ? ", trigger" : "")}] {hits[i].distance:F2}m; ");
+            return sb.ToString();
+        }
+
+        private static void Run(string[] args, string prefix = "")
         {
             switch (args[0])
             {
@@ -312,9 +341,10 @@ namespace GWYFVR
                     {
                         var controller = LocalPlayer.Controller;
                         var interact = controller != null ? controller.GetComponent<PlayerInteract>() : null;
-                        Plugin.Log.LogInfo($"Layer {InputEvents.ActiveLayer}, pointing at menu {VRPointer.Instance?.IsPointingAtMenu} ('{WorldSpaceUI.LastHit}'), " +
+                        Plugin.Log.LogInfo(prefix + $"Layer {InputEvents.ActiveLayer}, pointing at menu {VRPointer.Instance?.IsPointingAtMenu} ('{WorldSpaceUI.LastHit}'), " +
                                            $"locked {controller?.IsLocked}, interact enabled {interact?.enabled}, target '{(interact?.TargetInteractable as Component)?.name}', " +
-                                           $"holding {GWYFVR.Input.HandRoles.IsHoldingItem}, active hand {GWYFVR.Input.HandRoles.ActiveHand}");
+                                           $"holding {GWYFVR.Input.HandRoles.IsHoldingItem}, active hand {GWYFVR.Input.HandRoles.ActiveHand}, " +
+                                           $"ray hits '{RayHit()}'");
                     }
                     break;
 
