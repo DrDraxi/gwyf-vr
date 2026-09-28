@@ -307,6 +307,17 @@ namespace GWYFVR
                         }
                     break;
 
+                case "state":
+                    // state: why interaction might be blocked
+                    {
+                        var controller = LocalPlayer.Controller;
+                        var interact = controller != null ? controller.GetComponent<PlayerInteract>() : null;
+                        Plugin.Log.LogInfo($"Layer {InputEvents.ActiveLayer}, pointing at menu {VRPointer.Instance?.IsPointingAtMenu} ('{WorldSpaceUI.LastHit}'), " +
+                                           $"locked {controller?.IsLocked}, interact enabled {interact?.enabled}, target '{(interact?.TargetInteractable as Component)?.name}', " +
+                                           $"holding {GWYFVR.Input.HandRoles.IsHoldingItem}, active hand {GWYFVR.Input.HandRoles.ActiveHand}");
+                    }
+                    break;
+
                 case "loading":
                     // loading 1/0: show or hide the game's loading screen
                     Extensions.MonoSingleton<SceneTransitioner>.Instance?.ForceSet(args.Length > 1 && args[1] == "1");

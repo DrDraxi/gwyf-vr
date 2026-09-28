@@ -28,6 +28,14 @@ namespace GWYFVR.UI
             public Material Material;
         }
 
+        private static readonly HashSet<Canvas> Showing = new HashSet<Canvas>();
+
+        /// <summary>
+        /// Whether a canvas is showing a full-screen screen right now. Those are placed like menus, standing
+        /// still in front of you, instead of following your head like the HUD, so they are easy to read.
+        /// </summary>
+        public static bool IsFullScreen(Canvas canvas) => Showing.Contains(canvas);
+
         private readonly Dictionary<Graphic, Backdrop> backdrops = new Dictionary<Graphic, Backdrop>();
         private readonly List<Graphic> stale = new List<Graphic>();
         private Mesh sphere;
@@ -63,6 +71,7 @@ namespace GWYFVR.UI
 
             var head = rig.VRCamera.transform.position;
             stale.Clear();
+            Showing.Clear();
             foreach (var pair in backdrops)
             {
                 var b = pair.Value;
@@ -82,6 +91,7 @@ namespace GWYFVR.UI
                 if (!show)
                     continue;
 
+                Showing.Add(b.Canvas);
                 b.Renderer.transform.position = head;
                 var color = b.Source.color;
                 color.a = alpha;

@@ -282,7 +282,7 @@ namespace GWYFVR.UI
             {
                 var canvas = stacked[i];
                 // In game, anything that isn't a clickable menu is HUD and follows your head.
-                var hud = inGame && !menus.Contains(canvas);
+                var hud = inGame && !menus.Contains(canvas) && !ImmersiveScreens.IsFullScreen(canvas);
                 var anchor = hud ? HudAnchor : Anchor;
                 var scale = hud ? hudScale : menuScale;
 
@@ -323,6 +323,9 @@ namespace GWYFVR.UI
         }
 
         /// <summary>Intersect a ray with the visible, pointable canvases. Used to draw the laser.</summary>
+        /// <summary>What the last UI raycast hit, for dev diagnostics.</summary>
+        public static string LastHit { get; private set; } = "";
+
         private static bool HitsSelectable(Canvas canvas, Vector3 worldPoint)
         {
             foreach (var selectable in canvas.GetComponentsInChildren<Selectable>())
@@ -331,7 +334,10 @@ namespace GWYFVR.UI
                     continue;
                 var rt = (RectTransform)selectable.transform;
                 if (rt.rect.Contains(rt.InverseTransformPoint(worldPoint)))
+                {
+                    LastHit = $"{canvas.name}/{selectable.name}";
                     return true;
+                }
             }
 
             return false;
@@ -345,6 +351,7 @@ namespace GWYFVR.UI
             // In game the HUD is always up; only count hits on actual buttons there, so the laser doesn't
             // stick to the HUD. In menus any part of a menu panel counts.
             var buttonsOnly = VRRig.Instance != null && VRRig.Instance.PlayerMode;
+            LastHit = "";
 
             foreach (var canvas in canvases)
             {
@@ -365,6 +372,8 @@ namespace GWYFVR.UI
 
                 best = distance;
                 point = hit;
+                if (!buttonsOnly)
+                    LastHit = canvas.name;
             }
 
             return best < float.MaxValue;
