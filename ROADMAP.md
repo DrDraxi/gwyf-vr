@@ -7,8 +7,6 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
   - Cross-play: VR players must stay compatible with players who don't have the mod. Keep the network
     protocol untouched; anything extra (hand poses) only goes to players who also run the mod.
   - Throws as a client: the host's copy still launches items from in front of the face.
-- Post-processing in VR: rebuild the XR-enabled render pipeline with the exact game Unity version
-  (6000.3.6f1); the 6000.3.7 build is missing a pass in the game's UberPost shader.
 
 - Ragdoll, knockback, being carried and the spawn-box launch: add a comfort fade or vignette.
 - Number boxes (custom lobby, settings) need a VR keypad; zoom and pocket slots need VR buttons.
@@ -34,6 +32,7 @@ Collected from play-testing on a Valve Index (2026-09-28). Roughly in priority o
 - Physical bat swing: hand speed turns on the bat's hit area.
 - Grab items by touching them with either hand (laser as fallback); bet slider follows the hand.
 - Drunk wobble kept by default, with a VR setting to turn it off.
+- Post-processing works in VR (URP's XR visibility mesh off, so UberPost's missing XR pass isn't used).
 - Lost eye: 92.5% dark vignette with a stitched plus instead of solid black.
 - Fixed: touch grab targeted your own body (blocked all interaction); desktop mouse pulled menu clicks off
   the laser; round end screens stand still instead of following the head.

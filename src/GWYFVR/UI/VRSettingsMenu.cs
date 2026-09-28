@@ -76,6 +76,7 @@ namespace GWYFVR.UI
             Add(Slider("huddistance", "HUD distance", 0.5f, 3f, false, s.HudDistance), e => s.HudDistance.Value = ((SliderSettingItem)e).value);
             Add(Slider("hudwidth", "HUD size", 0.5f, 3f, false, s.HudWidth), e => s.HudWidth.Value = ((SliderSettingItem)e).value);
             Add(Slider("menudistance", "Menu distance", 0.5f, 5f, false, s.UIDistance), e => s.UIDistance.Value = ((SliderSettingItem)e).value);
+            Add(Toggle("postprocessing", "Post-processing", s.PostProcessing), e => s.PostProcessing.Value = ((ToggleSettingItem)e).value);
             Add(Toggle("drunkeffect", "Drunk screen wobble", s.DrunkEffect), e => s.DrunkEffect.Value = ((ToggleSettingItem)e).value);
             Add(Toggle("skipsplash", "Skip the start-up coin flip", s.SkipSplash), e => s.SkipSplash.Value = ((ToggleSettingItem)e).value);
         }

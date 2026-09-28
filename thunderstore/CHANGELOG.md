@@ -12,6 +12,7 @@
 - Loading, round end and game over screens surround you; fades cover your whole view.
 - Body part machine: a lost eye gets a dark stitched patch; a rolling head stays upright.
 - The game window shows the left eye.
+- Post-processing (colour grading, bloom, drunk wobble) now works in VR, with an on/off setting.
 - Fixes: a pink lens outline in the world, round end blocking interaction, the desktop mouse pulling
   menu clicks away from the laser.
 
@@ -20,7 +21,7 @@
 First version tested on a real headset (Valve Index).
 
 - Renders to the headset: the game ships its render pipeline without VR support, so the mod swaps in a
-  VR-enabled build and starts URP's XR system (game post-processing is off in VR for now).
+  VR-enabled build and starts URP's XR system (game post-processing was off in VR).
 - Head tracking, snap/smooth turning, room-scale movement (walking in your room moves you).
 - Controllers: move/jump/crouch/sprint via a virtual gamepad; grip picks up and holds items in either hand,
   swing and let go to throw; trigger works machines and uses items; A climbs out of the spawn box.

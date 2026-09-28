@@ -76,8 +76,9 @@ namespace GWYFVR
             RenderScale = config.Bind("Rendering", "RenderScale", 1f,
                 new ConfigDescription("Headset render resolution multiplier.", new AcceptableValueRange<float>(0.5f, 2f)));
 
-            PostProcessing = config.Bind("Rendering", "PostProcessing", false,
-                "Use the game's post-processing effects. They currently render black in VR, leave off.");
+            PostProcessing = config.Bind("Rendering", "PostProcessingInVR", true,
+                "Use the game's post-processing effects (colour grading, bloom, the drunk wobble) in VR.");
+            PostProcessing.SettingChanged += (_, __) => Player.VRRig.Instance?.RefreshCamera();
             DesktopMirror = config.Bind("Rendering", "DesktopMirror", true,
                 "Show the left eye in the game window.");
 
