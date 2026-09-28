@@ -18,6 +18,7 @@ namespace GWYFVR
     {
         public readonly ConfigEntry<bool> EnableVR;
         public readonly ConfigEntry<string> OpenXRRuntimeFile;
+        public readonly ConfigEntry<bool> SkipSplash;
         public readonly ConfigEntry<StereoMode> RenderMode;
         public readonly ConfigEntry<float> RenderScale;
         public readonly ConfigEntry<bool> PostProcessing;
@@ -38,6 +39,9 @@ namespace GWYFVR
                 "Start the game in VR. You can also launch with --disable-vr to play flat once.");
             OpenXRRuntimeFile = config.Bind("General", "OpenXRRuntimeFile", "",
                 "Optional path to an OpenXR runtime json to use instead of the system default (for example SteamVR's steamxr_win64.json).");
+
+            SkipSplash = config.Bind("General", "SkipSplash", true,
+                "Skip the coin flip question at start-up and go straight to the main menu.");
 
             RenderMode = config.Bind("Rendering", "StereoMode", StereoMode.MultiPass,
                 "MultiPass is the most compatible. SinglePassInstanced is faster but some game shaders may render in one eye only.");
