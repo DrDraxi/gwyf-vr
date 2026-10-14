@@ -3,6 +3,13 @@
 A VR mod for [Gamble With Your Friends](https://store.steampowered.com/app/3892270/) built on BepInEx 5.
 Player-facing docs (controls, settings, troubleshooting) live in [thunderstore/README.md](thunderstore/README.md).
 
+| | |
+|:-:|:-:|
+| ![Main menu with the laser pointer](assets/vr-menu.gif) | ![Taking photos with the camera](assets/vr-camera.gif) |
+| Main menu with the laser pointer | Taking photos with the camera |
+| ![Picking up and aiming the gun](assets/vr-gun.gif) | ![Buying tickets at the counter](assets/vr-tickets.gif) |
+| Picking up and aiming the gun | Buying tickets at the counter |
+
 ## How it works
 
 The game is a Unity 6 (6000.3), Mono, URP build with its XR support stripped, so the mod brings its own:
