@@ -1,9 +1,9 @@
 # GWYFVR
 
-[![Thunderstore](https://img.shields.io/badge/Thunderstore-Draxi%2FGWYFVR-23FFB0)](https://thunderstore.io/package/Draxi/GWYFVR/)
+[![Thunderstore](https://img.shields.io/badge/Thunderstore-Draxi%2FGWYFVR-23FFB0)](https://thunderstore.io/c/gamble-with-your-friends/p/Draxi/GWYFVR/)
 
 A VR mod for [Gamble With Your Friends](https://store.steampowered.com/app/3892270/) built on BepInEx 5.
-**Install it from [Thunderstore](https://thunderstore.io/package/Draxi/GWYFVR/)** (r2modman or Thunderstore Mod Manager).
+**Install it from [Thunderstore](https://thunderstore.io/c/gamble-with-your-friends/p/Draxi/GWYFVR/)** (r2modman or Thunderstore Mod Manager).
 Player-facing docs (controls, settings, troubleshooting) live in [thunderstore/README.md](thunderstore/README.md).
 
 | | |
