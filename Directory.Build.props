@@ -7,7 +7,7 @@
     <LangVersion>latest</LangVersion>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>disable</Nullable>
-    <Version>0.3.3</Version>
+    <Version>0.3.4</Version>
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)GWYFVR.props.user" Condition="Exists('$(MSBuildThisFileDirectory)GWYFVR.props.user')" />
 </Project>

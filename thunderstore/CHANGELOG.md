@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4 (alpha)
+
+- The main menu rendered the scene twice in VR (a leftover menu camera kept drawing underneath the VR view). Fixed, so the menu frame rate is much higher.
+
 ## 0.3.3 (alpha)
 
 - The source code is public: https://github.com/DrDraxi/gwyf-vr

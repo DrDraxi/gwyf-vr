@@ -112,11 +112,14 @@ namespace GWYFVR.Player
                 if (cam.name.StartsWith("VR") || cam.transform.IsChildOf(transform) || cam.transform.IsChildOf(VRCamera.transform))
                     continue;
                 // Only UI cameras: a world camera may become the camera to follow later (cutscenes).
-                if (!IsFlatUICamera(cam))
+                // The exception is the menu with its backdrop loaded: the menu's own 3D camera would
+                // draw the whole backdrop scenery into the headset a second time, underneath the VR
+                // camera's picture, which more than halves the frame rate.
+                if (!IsFlatUICamera(cam) && BackdropViewpoint == null)
                     continue;
 
                 cam.enabled = false;
-                Plugin.Log.LogInfo($"Disabled flat screen camera '{cam.name}'");
+                Plugin.Log.LogInfo($"Disabled {(IsFlatUICamera(cam) ? "flat screen" : "menu scene")} camera '{cam.name}'");
             }
         }
 
